@@ -31,6 +31,7 @@ export function RecurringForm({ onDone }: { onDone: () => void }) {
     e.preventDefault()
     setError('')
     if (!accountId) { setError('اختر حسابًا'); return }
+    if (endDate && endDate < startDate) { setError('تاريخ النهاية يجب أن يكون بعد تاريخ البداية'); return }
     try {
       const cents = parseAmount(amount)
       if (!(cents > 0)) { setError('أدخل مبلغًا أكبر من صفر'); return }

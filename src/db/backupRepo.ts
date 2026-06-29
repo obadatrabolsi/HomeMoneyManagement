@@ -50,6 +50,12 @@ export async function importBackup(json: string): Promise<void> {
   if (![1, 2, 3, 4, 5].includes(data.schemaVersion)) {
     throw new Error('INCOMPATIBLE_VERSION')
   }
+  const arrayFields = ['categories', 'transactions', 'budgets', 'goals', 'goalContributions', 'recurringRules', 'debts', 'debtPayments'] as const
+  for (const f of arrayFields) {
+    if ((data as any)[f] !== undefined && !Array.isArray((data as any)[f])) {
+      throw new Error('INVALID_BACKUP')
+    }
+  }
   await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.settings, db.budgets, db.goals, db.goalContributions, db.recurringRules, db.debts, db.debtPayments], async () => {
     await Promise.all([
       db.accounts.clear(), db.categories.clear(), db.transactions.clear(), db.settings.clear(), db.budgets.clear(),
