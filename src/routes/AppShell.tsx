@@ -9,6 +9,7 @@ const tabs = [
   { to: '/', label: t('dashboard') },
   { to: '/accounts', label: t('accounts') },
   { to: '/transactions', label: t('transactions') },
+  { to: '/budgets', label: t('budgets') },
   { to: '/settings', label: t('settings') },
 ]
 
