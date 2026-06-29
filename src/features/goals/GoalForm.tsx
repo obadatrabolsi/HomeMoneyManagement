@@ -20,9 +20,11 @@ export function GoalForm({ onDone }: { onDone: () => void }) {
     setError('')
     if (!name.trim()) { setError('الاسم مطلوب'); return }
     try {
+      const cents = parseAmount(target || '0')
+      if (!(cents > 0)) { setError('أدخل مبلغًا أكبر من صفر'); return }
       await createGoal({
         name: name.trim(),
-        targetAmount: parseAmount(target || '0'),
+        targetAmount: cents,
         currency: settings?.defaultCurrency ?? 'EUR',
         targetDate: targetDate || undefined,
         notes: notes || undefined,
