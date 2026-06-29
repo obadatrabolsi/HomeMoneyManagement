@@ -41,6 +41,7 @@ export interface Transaction {
   isFavorite?: boolean
   transferGroupId?: string
   counterAccountId?: string
+  transferDirection?: 'out' | 'in'
   createdAt: string
   updatedAt: string
   deletedAt?: string
