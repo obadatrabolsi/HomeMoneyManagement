@@ -4,10 +4,12 @@ import { totalsByCurrency, listAccounts } from '../../db/accountsRepo'
 import { dayTotalsByCurrency, rangeTotalsByCurrency, categoryBreakdown, recentTransactions } from '../../db/transactionsRepo'
 import { listCategories } from '../../db/categoriesRepo'
 import { budgetProgress } from '../../db/budgetsRepo'
+import { goalsWithProgress } from '../../db/goalsRepo'
 import { isoDate, monthRange, isoMonth } from '../../lib/date'
 import { formatMoney } from '../../lib/money'
 import { CategoryPie } from './CategoryPie'
 import { BudgetBar } from '../budgets/BudgetBar'
+import { GoalBar } from '../goals/GoalBar'
 import { TransactionRow } from '../transactions/TransactionRow'
 import { t } from '../../i18n/ar'
 
@@ -24,11 +26,12 @@ export function DashboardPage() {
     const catName = (id: string | null) => cats.find((c) => c.id === id)?.name ?? 'أخرى'
     const pie = breakdown.map((b) => ({ name: catName(b.categoryId), value: b.total / 100 }))
     const budgets = (await budgetProgress(isoMonth(now))).slice(0, 3).map(p => ({ ...p, categoryName: catName(p.budget.categoryId) }))
+    const goals = (await goalsWithProgress()).slice(0, 3)
     const recent = await recentTransactions(5)
     const accounts = await listAccounts()
     const accCur: Record<string, string> = {}
     for (const a of accounts) accCur[a.id] = a.currency
-    return { totals, dayByCur, monthByCur, pie, budgets, recent, accCur }
+    return { totals, dayByCur, monthByCur, pie, budgets, goals, recent, accCur }
   }, [], undefined)
 
   if (!data) return null
@@ -108,6 +111,23 @@ export function DashboardPage() {
                 <span className={p.status === 'over' ? 'text-red-600' : 'text-gray-500'}>{p.percent}%</span>
               </div>
               <BudgetBar percent={p.percent} status={p.status} />
+            </div>
+          ))}
+        </section>
+      )}
+      {data.goals.length > 0 && (
+        <section className="space-y-2 rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-900">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm text-gray-500">{t('goals')}</h2>
+            <Link to="/goals" className="text-xs text-emerald-600">{t('viewAll')}</Link>
+          </div>
+          {data.goals.map((p) => (
+            <div key={p.goal.id} className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span>{p.goal.name}</span>
+                <span className="text-gray-500">{p.percent}%</span>
+              </div>
+              <GoalBar percent={p.percent} reached={p.reached} />
             </div>
           ))}
         </section>
