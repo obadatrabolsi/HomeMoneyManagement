@@ -110,3 +110,27 @@ export interface RecurringRule {
   createdAt: string
   updatedAt: string
 }
+
+export type DebtDirection = 'owe' | 'owed'
+
+export interface Debt {
+  id: string
+  direction: DebtDirection
+  person: string
+  amount: number // cents, total principal
+  currency: string
+  dueDate?: string // yyyy-MM-dd
+  notes?: string
+  isSettled: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface DebtPayment {
+  id: string
+  debtId: string
+  amount: number // cents
+  date: string // yyyy-MM-dd
+  note?: string
+  createdAt: string
+}

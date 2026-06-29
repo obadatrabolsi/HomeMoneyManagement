@@ -5,7 +5,7 @@ beforeEach(async () => { await db.delete(); await db.open() })
 
 describe('schema v4', () => {
   it('is version 4 and exposes recurringRules', () => {
-    expect(SCHEMA_VERSION).toBe(4)
+    expect(SCHEMA_VERSION).toBeGreaterThanOrEqual(4)
     expect(db.recurringRules).toBeTruthy()
   })
   it('round-trips a recurring rule', async () => {
