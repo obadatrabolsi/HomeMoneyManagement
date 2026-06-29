@@ -1,5 +1,5 @@
 import { db, SCHEMA_VERSION } from './schema'
-import type { Account, Category, Transaction, Settings, Budget, Goal, GoalContribution, RecurringRule } from './types'
+import type { Account, Category, Transaction, Settings, Budget, Goal, GoalContribution, RecurringRule, Debt, DebtPayment } from './types'
 
 interface BackupShape {
   schemaVersion: number
@@ -12,10 +12,12 @@ interface BackupShape {
   goals?: Goal[]
   goalContributions?: GoalContribution[]
   recurringRules?: RecurringRule[]
+  debts?: Debt[]
+  debtPayments?: DebtPayment[]
 }
 
 export async function exportBackup(): Promise<string> {
-  const [accounts, categories, transactions, settings, budgets, goals, goalContributions, recurringRules] = await Promise.all([
+  const [accounts, categories, transactions, settings, budgets, goals, goalContributions, recurringRules, debts, debtPayments] = await Promise.all([
     db.accounts.toArray(),
     db.categories.toArray(),
     db.transactions.toArray(),
@@ -24,11 +26,13 @@ export async function exportBackup(): Promise<string> {
     db.goals.toArray(),
     db.goalContributions.toArray(),
     db.recurringRules.toArray(),
+    db.debts.toArray(),
+    db.debtPayments.toArray(),
   ])
   const payload: BackupShape = {
     schemaVersion: SCHEMA_VERSION,
     exportedAt: new Date().toISOString(),
-    accounts, categories, transactions, settings: settings ?? null, budgets, goals, goalContributions, recurringRules,
+    accounts, categories, transactions, settings: settings ?? null, budgets, goals, goalContributions, recurringRules, debts, debtPayments,
   }
   return JSON.stringify(payload, null, 2)
 }
@@ -46,10 +50,11 @@ export async function importBackup(json: string): Promise<void> {
   if (![1, 2, 3, 4, 5].includes(data.schemaVersion)) {
     throw new Error('INCOMPATIBLE_VERSION')
   }
-  await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.settings, db.budgets, db.goals, db.goalContributions, db.recurringRules], async () => {
+  await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.settings, db.budgets, db.goals, db.goalContributions, db.recurringRules, db.debts, db.debtPayments], async () => {
     await Promise.all([
       db.accounts.clear(), db.categories.clear(), db.transactions.clear(), db.settings.clear(), db.budgets.clear(),
       db.goals.clear(), db.goalContributions.clear(), db.recurringRules.clear(),
+      db.debts.clear(), db.debtPayments.clear(),
     ])
     await db.accounts.bulkAdd(data.accounts)
     await db.categories.bulkAdd(data.categories ?? [])
@@ -58,6 +63,8 @@ export async function importBackup(json: string): Promise<void> {
     await db.goals.bulkAdd(data.goals ?? [])
     await db.goalContributions.bulkAdd(data.goalContributions ?? [])
     await db.recurringRules.bulkAdd(data.recurringRules ?? [])
+    await db.debts.bulkAdd(data.debts ?? [])
+    await db.debtPayments.bulkAdd(data.debtPayments ?? [])
     if (data.settings) await db.settings.put(data.settings)
   })
 }
