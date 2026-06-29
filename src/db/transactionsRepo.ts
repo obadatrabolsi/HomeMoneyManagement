@@ -61,3 +61,48 @@ export async function toggleFavorite(txId: string): Promise<void> {
   if (!tx) return
   await db.transactions.update(txId, { isFavorite: !tx.isFavorite })
 }
+
+export interface CreateTransferInput {
+  fromAccountId: string
+  toAccountId: string
+  amount: number
+  date: string
+  time?: string
+  notes?: string
+  tags?: string[]
+}
+
+export async function createTransfer(
+  input: CreateTransferInput,
+): Promise<{ groupId: string; outId: string; inId: string }> {
+  if (input.fromAccountId === input.toAccountId) throw new Error('SAME_ACCOUNT')
+  const groupId = id()
+  const outId = id()
+  const inId = id()
+  const stamp = nowIso()
+
+  await db.transaction('rw', db.accounts, db.transactions, async () => {
+    const from = await db.accounts.get(input.fromAccountId)
+    const to = await db.accounts.get(input.toAccountId)
+    if (!from || !to) throw new Error('ACCOUNT_NOT_FOUND')
+    if (from.currency !== to.currency) throw new Error('CURRENCY_MISMATCH')
+
+    const base = {
+      type: 'transfer' as const,
+      amount: input.amount,
+      date: input.date,
+      time: input.time,
+      notes: input.notes,
+      tags: input.tags ?? [],
+      transferGroupId: groupId,
+      createdAt: stamp,
+      updatedAt: stamp,
+    }
+    await db.transactions.bulkAdd([
+      { ...base, id: outId, transferDirection: 'out', accountId: input.fromAccountId, counterAccountId: input.toAccountId },
+      { ...base, id: inId, transferDirection: 'in', accountId: input.toAccountId, counterAccountId: input.fromAccountId },
+    ])
+  })
+
+  return { groupId, outId, inId }
+}
