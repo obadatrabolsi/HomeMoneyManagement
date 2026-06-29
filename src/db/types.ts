@@ -63,3 +63,27 @@ export interface Budget {
   createdAt: string
   updatedAt: string
 }
+
+export interface Goal {
+  id: string
+  name: string
+  targetAmount: number // cents
+  currency: string
+  targetDate?: string // yyyy-MM-dd
+  notes?: string
+  icon: string
+  color: string
+  isArchived: boolean
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface GoalContribution {
+  id: string
+  goalId: string
+  amount: number // cents, may be negative
+  date: string // yyyy-MM-dd
+  note?: string
+  createdAt: string
+}

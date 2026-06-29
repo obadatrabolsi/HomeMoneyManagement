@@ -1,5 +1,5 @@
 import { db, SCHEMA_VERSION } from './schema'
-import type { Account, Category, Transaction, Settings, Budget } from './types'
+import type { Account, Category, Transaction, Settings, Budget, Goal, GoalContribution } from './types'
 
 interface BackupShape {
   schemaVersion: number
@@ -9,20 +9,24 @@ interface BackupShape {
   transactions: Transaction[]
   settings: Settings | null
   budgets?: Budget[]
+  goals?: Goal[]
+  goalContributions?: GoalContribution[]
 }
 
 export async function exportBackup(): Promise<string> {
-  const [accounts, categories, transactions, settings, budgets] = await Promise.all([
+  const [accounts, categories, transactions, settings, budgets, goals, goalContributions] = await Promise.all([
     db.accounts.toArray(),
     db.categories.toArray(),
     db.transactions.toArray(),
     db.settings.get('singleton'),
     db.budgets.toArray(),
+    db.goals.toArray(),
+    db.goalContributions.toArray(),
   ])
   const payload: BackupShape = {
     schemaVersion: SCHEMA_VERSION,
     exportedAt: new Date().toISOString(),
-    accounts, categories, transactions, settings: settings ?? null, budgets,
+    accounts, categories, transactions, settings: settings ?? null, budgets, goals, goalContributions,
   }
   return JSON.stringify(payload, null, 2)
 }
@@ -37,17 +41,20 @@ export async function importBackup(json: string): Promise<void> {
   if (!data || typeof data !== 'object' || !Array.isArray(data.accounts)) {
     throw new Error('INVALID_BACKUP')
   }
-  if (data.schemaVersion !== 1 && data.schemaVersion !== 2) {
+  if (![1, 2, 3].includes(data.schemaVersion)) {
     throw new Error('INCOMPATIBLE_VERSION')
   }
-  await db.transaction('rw', db.accounts, db.categories, db.transactions, db.settings, db.budgets, async () => {
+  await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.settings, db.budgets, db.goals, db.goalContributions], async () => {
     await Promise.all([
       db.accounts.clear(), db.categories.clear(), db.transactions.clear(), db.settings.clear(), db.budgets.clear(),
+      db.goals.clear(), db.goalContributions.clear(),
     ])
     await db.accounts.bulkAdd(data.accounts)
     await db.categories.bulkAdd(data.categories ?? [])
     await db.transactions.bulkAdd(data.transactions ?? [])
     await db.budgets.bulkAdd(data.budgets ?? [])
+    await db.goals.bulkAdd(data.goals ?? [])
+    await db.goalContributions.bulkAdd(data.goalContributions ?? [])
     if (data.settings) await db.settings.put(data.settings)
   })
 }
