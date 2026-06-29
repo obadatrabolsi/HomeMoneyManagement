@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { exportBackup, importBackup } from '../../db/backupRepo'
 import { Button } from '../../components/ui/Button'
 import { t } from '../../i18n/ar'
@@ -35,6 +36,11 @@ export function BackupPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">{t('settings')}</h1>
+      <nav className="flex flex-wrap gap-2">
+        <Link to="/goals" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('goals')}</Link>
+        <Link to="/budgets" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('budgets')}</Link>
+        <Link to="/categories" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('categories')}</Link>
+      </nav>
       <Button onClick={doExport}>{t('exportBackup')}</Button>
       <div>
         <label className="inline-block cursor-pointer rounded-xl bg-gray-200 px-4 py-2 dark:bg-gray-800">

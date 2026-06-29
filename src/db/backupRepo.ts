@@ -44,7 +44,7 @@ export async function importBackup(json: string): Promise<void> {
   if (![1, 2, 3].includes(data.schemaVersion)) {
     throw new Error('INCOMPATIBLE_VERSION')
   }
-  await db.transaction('rw', db.accounts, db.categories, db.transactions, db.settings, db.budgets, db.goals, db.goalContributions, async () => {
+  await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.settings, db.budgets, db.goals, db.goalContributions], async () => {
     await Promise.all([
       db.accounts.clear(), db.categories.clear(), db.transactions.clear(), db.settings.clear(), db.budgets.clear(),
       db.goals.clear(), db.goalContributions.clear(),

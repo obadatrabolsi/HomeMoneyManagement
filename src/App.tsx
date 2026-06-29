@@ -7,6 +7,7 @@ import { TransactionsPage } from './features/transactions/TransactionsPage'
 import { CategoriesPage } from './features/categories/CategoriesPage'
 import { BackupPage } from './features/backup/BackupPage'
 import { BudgetsPage } from './features/budgets/BudgetsPage'
+import { GoalsPage } from './features/goals/GoalsPage'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/budgets" element={<BudgetsPage />} />
+          <Route path="/goals" element={<GoalsPage />} />
           <Route path="/settings" element={<BackupPage />} />
         </Route>
       </Routes>

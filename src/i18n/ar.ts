@@ -49,6 +49,14 @@ export const strings = {
   duplicateBudget: 'توجد ميزانية لهذا التصنيف في هذا الشهر بنفس العملة',
   budgetProgress: 'تقدم الميزانية',
   viewAll: 'عرض الكل',
+  goals: 'الأهداف',
+  addGoal: 'إضافة هدف',
+  targetAmount: 'المبلغ المستهدف',
+  targetDate: 'تاريخ الإنجاز',
+  current: 'الحالي',
+  addContribution: 'إضافة مبلغ',
+  reached: 'تم الإنجاز ✓',
+  more: 'المزيد',
 } as const
 
 export function t(key: keyof typeof strings): string {
