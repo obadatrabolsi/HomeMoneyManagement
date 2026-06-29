@@ -6,6 +6,7 @@ import { RecurringForm } from './RecurringForm'
 import { Button } from '../../components/ui/Button'
 import { Sheet } from '../../components/ui/Sheet'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { Icon } from '../../components/ui/Icon'
 import { t } from '../../i18n/ar'
 
 export function RecurringPage() {
@@ -13,25 +14,42 @@ export function RecurringPage() {
   const rules = useLiveQuery(() => listRules(true), [], [])
 
   return (
-    <div className="space-y-3">
+    <div className="animate-fade-in space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{t('recurring')}</h1>
-        <Button onClick={() => setOpen(true)}>{t('addRecurring')}</Button>
+        <h1 className="text-xl font-bold text-ink">{t('recurring')}</h1>
+        <Button onClick={() => setOpen(true)}>
+          <Icon name="plus" size={18} />
+          {t('addRecurring')}
+        </Button>
       </div>
-      {rules.length === 0 && <EmptyState message={t('noData')} />}
-      {rules.map((r) => (
-        <div key={r.id} className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900">
-          <div>
-            <p className="font-medium">{r.merchant || t(r.type)}</p>
-            <p className="text-xs text-gray-400">{t('every')} {r.interval} {t(r.frequency)} · {t('nextRun')}: {r.nextRunDate}</p>
+      {rules.length === 0 && <EmptyState message={t('noData')} emoji="🔁" />}
+      <div className="space-y-3">
+        {rules.map((r) => (
+          <div key={r.id} className="flex items-center justify-between rounded-2xl bg-surface p-3 shadow-soft">
+            <div>
+              <p className="font-medium text-ink">{r.merchant || t(r.type)}</p>
+              <p className="text-xs text-muted">{t('every')} {r.interval} {t(r.frequency)} · {t('nextRun')}: {r.nextRunDate}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={`font-semibold tabular-nums ${r.type === 'income' ? 'text-income' : 'text-expense'}`}>{formatMoney(r.amount, 'EUR')}</span>
+              <button
+                aria-label={t('active')}
+                onClick={async () => { await updateRule(r.id, { isActive: !r.isActive }) }}
+                className={`text-lg ${r.isActive ? 'text-income' : 'text-muted'}`}
+              >
+                {r.isActive ? '⏸' : '▶'}
+              </button>
+              <button
+                aria-label={t('delete')}
+                onClick={async () => { if (window.confirm('حذف هذه العملية المتكررة؟')) await deleteRule(r.id) }}
+                className="text-muted hover:text-expense"
+              >
+                <Icon name="trash" size={18} />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className={r.type === 'income' ? 'text-emerald-600' : 'text-red-600'}>{formatMoney(r.amount, 'EUR')}</span>
-            <button aria-label={t('active')} onClick={async () => { await updateRule(r.id, { isActive: !r.isActive }) }}>{r.isActive ? '⏸' : '▶'}</button>
-            <button aria-label={t('delete')} onClick={async () => { if (window.confirm('حذف هذه العملية المتكررة؟')) await deleteRule(r.id) }}>🗑</button>
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
       <Sheet open={open} onClose={() => setOpen(false)}>
         <RecurringForm onDone={() => setOpen(false)} />
       </Sheet>

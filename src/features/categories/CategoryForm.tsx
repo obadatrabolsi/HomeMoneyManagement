@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { createCategory, listCategories } from '../../db/categoriesRepo'
 import { Field } from '../../components/ui/Field'
 import { Button } from '../../components/ui/Button'
+import { Icon } from '../../components/ui/Icon'
 import { t } from '../../i18n/ar'
 import type { CategoryType } from '../../db/types'
 
@@ -26,13 +27,13 @@ export function CategoryForm({ type, onDone }: { type: CategoryType; onDone: () 
     onDone()
   }
   return (
-    <form onSubmit={submit} className="flex items-end gap-2 flex-wrap">
+    <form onSubmit={submit} className="flex flex-wrap items-end gap-2">
       <Field label={t('name')}>
-        <input className="w-full rounded-lg border p-2" value={name} onChange={(e) => setName(e.target.value)} />
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
       </Field>
       <Field label={t('category')}>
         <select
-          className="w-full rounded-lg border p-2"
+          className="input"
           value={parentId}
           onChange={(e) => setParentId(e.target.value)}
         >
@@ -42,7 +43,10 @@ export function CategoryForm({ type, onDone }: { type: CategoryType; onDone: () 
           ))}
         </select>
       </Field>
-      <Button type="submit">{t('add')}</Button>
+      <Button type="submit">
+        <Icon name="plus" size={18} />
+        {t('add')}
+      </Button>
     </form>
   )
 }

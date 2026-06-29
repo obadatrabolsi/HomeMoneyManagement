@@ -2,5 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-html { direction: rtl; }
-body { @apply bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100; }
+@layer base {
+  :root {
+    --brand: 109 40 217; /* #6D28D9 */
+    --brand-soft: 139 92 246; /* #8B5CF6 */
+    --grad-from: 124 58 237; /* #7C3AED */
+    --grad-to: 99 102 241; /* #6366F1 */
+    --income: 16 185 129; /* #10B981 */
+    --expense: 244 63 94; /* #F43F5E */
+    --transfer: 14 165 233; /* #0EA5E9 */
+    --warning: 245 158 11; /* #F59E0B */
+    --bg: 248 250 252; /* #F8FAFC */
+    --surface: 255 255 255; /* #FFFFFF */
+    --surface-2: 241 245 249; /* #F1F5F9 */
+    --line: 226 232 240; /* #E2E8F0 */
+    --muted: 100 116 139; /* #64748B */
+    --ink: 15 23 42; /* #0F172A */
+  }
+
+  .dark {
+    --brand: 139 92 246; /* #8B5CF6 */
+    --brand-soft: 167 139 250; /* #A78BFA */
+    --grad-from: 124 58 237;
+    --grad-to: 79 70 229;
+    --income: 52 211 153; /* #34D399 */
+    --expense: 251 113 133; /* #FB7185 */
+    --transfer: 56 189 248; /* #38BDF8 */
+    --warning: 251 191 36; /* #FBBF24 */
+    --bg: 11 17 32; /* #0B1120 */
+    --surface: 17 24 39; /* #111827 */
+    --surface-2: 30 41 59; /* #1E293B */
+    --line: 31 41 55; /* #1F2937 */
+    --muted: 148 163 184; /* #94A3B8 */
+    --ink: 241 245 249; /* #F1F5F9 */
+  }
+
+  html {
+    direction: rtl;
+  }
+
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+  }
+
+  /* Respect the user's reduced-motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .input {
+    @apply w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-ink
+           placeholder:text-muted outline-none transition
+           focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/30
+           disabled:opacity-50;
+  }
+
+  .card {
+    @apply rounded-3xl bg-surface p-4 shadow-soft;
+  }
+}

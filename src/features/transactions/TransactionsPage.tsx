@@ -22,15 +22,15 @@ export function TransactionsPage() {
   const { txs, accCur } = result
 
   return (
-    <div className="space-y-3">
-      <h1 className="text-xl font-bold">{t('transactions')}</h1>
+    <div className="animate-fade-in space-y-4">
+      <h1 className="text-xl font-bold text-ink">{t('transactions')}</h1>
       <input
-        className="w-full rounded-lg border p-2"
+        className="input"
         placeholder={t('search')}
         value={filter.text ?? ''}
         onChange={(e) => setFilter({ text: e.target.value })}
       />
-      {txs.length === 0 && <EmptyState message={t('noData')} />}
+      {txs.length === 0 && <EmptyState message={t('noData')} emoji="🧾" />}
       {txs.map((tx) => (
         <TransactionRow key={tx.id} tx={tx} currency={accCur[tx.accountId] ?? 'EUR'} onDeleted={(ids) => setUndoIds(ids)} />
       ))}

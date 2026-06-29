@@ -6,6 +6,7 @@ import { DebtBar } from './DebtBar'
 import { DebtForm } from './DebtForm'
 import { PaymentForm } from './PaymentForm'
 import { Button } from '../../components/ui/Button'
+import { Icon } from '../../components/ui/Icon'
 import { Sheet } from '../../components/ui/Sheet'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { t } from '../../i18n/ar'
@@ -23,29 +24,38 @@ export function DebtsPage() {
   const section = (dir: DebtDirection) => {
     const items = (data?.progress ?? []).filter((p) => p.debt.direction === dir)
     return (
-      <section className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h2 className="font-bold">{t(dir)}</h2>
-          <span className="text-xs text-gray-500">
+      <section className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-bold text-ink">{t(dir)}</h2>
+          <span className="text-xs tabular-nums text-muted">
             {Object.entries((data?.totals[dir]) ?? {}).map(([cur, amt]) => formatMoney(amt, cur)).join(' · ')}
           </span>
         </div>
-        {items.length === 0 && <EmptyState message={t('noData')} />}
+        {items.length === 0 && <EmptyState message={t('noData')} emoji="🤝" />}
         {items.map((p) => (
-          <div key={p.debt.id} className="space-y-2 rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">{p.debt.person}</span>
+          <div key={p.debt.id} className="space-y-3 rounded-3xl bg-surface p-4 shadow-soft">
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-semibold text-ink">{p.debt.person}</span>
               <div className="flex items-center gap-3">
-                {p.settled && <span className="text-xs text-emerald-600">{t('settled')}</span>}
-                <button aria-label={t('delete')} onClick={async () => { if (window.confirm('حذف هذا الدين؟')) await deleteDebt(p.debt.id) }}>🗑</button>
+                {p.settled && <span className="text-xs font-semibold text-income">{t('settled')}</span>}
+                <button
+                  aria-label={t('delete')}
+                  className="text-muted transition hover:text-expense"
+                  onClick={async () => { if (window.confirm('حذف هذا الدين؟')) await deleteDebt(p.debt.id) }}
+                >
+                  <Icon name="trash" size={18} />
+                </button>
               </div>
             </div>
             <DebtBar percent={p.percent} settled={p.settled} />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>{t('paid')}: {formatMoney(p.paid, p.debt.currency)} / {formatMoney(p.debt.amount, p.debt.currency)} ({p.percent}%)</span>
-              {p.debt.dueDate && <span>{t('dueDate')}: {p.debt.dueDate}</span>}
+            <div className="flex justify-between gap-3 text-xs text-muted">
+              <span className="tabular-nums">{t('paid')}: {formatMoney(p.paid, p.debt.currency)} / {formatMoney(p.debt.amount, p.debt.currency)} ({p.percent}%)</span>
+              {p.debt.dueDate && <span className="tabular-nums">{t('dueDate')}: {p.debt.dueDate}</span>}
             </div>
-            <Button variant="ghost" onClick={() => setPayTo(p.debt.id)}>{t('addPayment')}</Button>
+            <Button variant="soft" className="w-full" onClick={() => setPayTo(p.debt.id)}>
+              <Icon name="plus" size={18} />
+              {t('addPayment')}
+            </Button>
           </div>
         ))}
       </section>
@@ -53,10 +63,13 @@ export function DebtsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="animate-fade-in space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{t('debts')}</h1>
-        <Button onClick={() => setAdding(true)}>{t('addDebt')}</Button>
+        <h1 className="text-xl font-bold text-ink">{t('debts')}</h1>
+        <Button onClick={() => setAdding(true)}>
+          <Icon name="plus" size={18} />
+          {t('addDebt')}
+        </Button>
       </div>
       {section('owe')}
       {section('owed')}

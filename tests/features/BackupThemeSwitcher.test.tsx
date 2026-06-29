@@ -16,7 +16,7 @@ describe('theme switcher', () => {
   it('renders the appearance control and persists a theme change', async () => {
     render(<MemoryRouter><BackupPage /></MemoryRouter>)
     expect(await screen.findByText('المظهر')).toBeInTheDocument()
-    await userEvent.selectOptions(screen.getByLabelText('المظهر'), 'dark')
+    await userEvent.click(screen.getByRole('tab', { name: 'داكن' }))
     await waitFor(async () => expect((await getSettings()).theme).toBe('dark'))
   })
 })

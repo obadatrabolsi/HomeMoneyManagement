@@ -38,17 +38,17 @@ export function BudgetForm({ month, onDone }: { month?: string; onDone: () => vo
   return (
     <form onSubmit={submit} className="space-y-3">
       <Field label={t('category')}>
-        <select className="w-full rounded-lg border p-2" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+        <select className="input" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
           <option value="">—</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </Field>
       <Field label={t('amount')}>
-        <input aria-label={t('amount')} className="w-full rounded-lg border p-2" inputMode="decimal"
+        <input aria-label={t('amount')} className="input" inputMode="decimal"
           value={amount} onChange={(e) => setAmount(e.target.value)} />
       </Field>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <Button type="submit">{t('save')}</Button>
+      {error && <p className="text-sm font-medium text-expense">{error}</p>}
+      <Button type="submit" variant="primary" className="w-full">{t('save')}</Button>
     </form>
   )
 }

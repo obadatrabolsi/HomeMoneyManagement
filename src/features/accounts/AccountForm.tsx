@@ -30,13 +30,13 @@ export function AccountForm({ onDone }: { onDone: () => void }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
       <Field label={t('name')} error={errors.name && 'مطلوب'}>
-        <input className="w-full rounded-lg border p-2" {...register('name')} />
+        <input className="input" {...register('name')} />
       </Field>
       <Field label={t('currency')} error={errors.currency && 'مطلوب'}>
-        <input className="w-full rounded-lg border p-2" {...register('currency')} />
+        <input className="input" {...register('currency')} />
       </Field>
       <Field label={t('initialBalance')}>
-        <input className="w-full rounded-lg border p-2" inputMode="decimal" {...register('initialBalance')} />
+        <input className="input" inputMode="decimal" {...register('initialBalance')} />
       </Field>
       <Button type="submit">{t('save')}</Button>
     </form>

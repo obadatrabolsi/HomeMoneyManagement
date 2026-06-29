@@ -9,6 +9,9 @@ import { formatMoney } from '../../lib/money'
 import { CategoryPie } from '../dashboard/CategoryPie'
 import { MonthlyBar } from './MonthlyBar'
 import { Field } from '../../components/ui/Field'
+import { Card } from '../../components/ui/Card'
+import { StatTile } from '../../components/ui/StatTile'
+import { SegmentedControl } from '../../components/ui/SegmentedControl'
 import { t } from '../../i18n/ar'
 
 type PeriodKey = 'thisMonth' | 'lastMonth' | 'thisYear'
@@ -49,47 +52,40 @@ export function ReportsPage() {
 
   if (!data) return null
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-bold">{t('reports')}</h1>
+    <div className="animate-fade-in space-y-4">
+      <h1 className="text-xl font-bold text-ink">{t('reports')}</h1>
       <div className="flex gap-2">
         <Field label={t('currency')}>
-          <select className="w-full rounded-lg border p-2" value={data.cur} onChange={(e) => setCurrency(e.target.value)}>
+          <select className="input" value={data.cur} onChange={(e) => setCurrency(e.target.value)}>
             {data.currencies.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </Field>
-        <Field label={t('period')}>
-          <select className="w-full rounded-lg border p-2" value={period} onChange={(e) => setPeriod(e.target.value as PeriodKey)}>
-            <option value="thisMonth">{t('thisMonth')}</option>
-            <option value="lastMonth">{t('lastMonth')}</option>
-            <option value="thisYear">{t('thisYear')}</option>
-          </select>
-        </Field>
+      </div>
+      <Field label={t('period')}>
+        <SegmentedControl
+          options={[
+            { value: 'thisMonth', label: t('thisMonth') },
+            { value: 'lastMonth', label: t('lastMonth') },
+            { value: 'thisYear', label: t('thisYear') },
+          ]}
+          value={period}
+          onChange={(v) => setPeriod(v as PeriodKey)}
+        />
+      </Field>
+
+      <div className="grid grid-cols-3 gap-2">
+        <StatTile label={t('income')} value={formatMoney(data.totals.income, data.cur)} tone="income" />
+        <StatTile label={t('expense')} value={formatMoney(data.totals.expense, data.cur)} tone="expense" />
+        <StatTile label={t('net')} value={formatMoney(data.totals.net, data.cur)} tone={data.totals.net < 0 ? 'expense' : 'income'} />
       </div>
 
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="rounded-xl bg-white p-3 shadow-sm dark:bg-gray-900">
-          <p className="text-xs text-gray-500">{t('income')}</p>
-          <p className="text-emerald-600">{formatMoney(data.totals.income, data.cur)}</p>
-        </div>
-        <div className="rounded-xl bg-white p-3 shadow-sm dark:bg-gray-900">
-          <p className="text-xs text-gray-500">{t('expense')}</p>
-          <p className="text-red-600">{formatMoney(data.totals.expense, data.cur)}</p>
-        </div>
-        <div className="rounded-xl bg-white p-3 shadow-sm dark:bg-gray-900">
-          <p className="text-xs text-gray-500">{t('net')}</p>
-          <p className={data.totals.net < 0 ? 'text-red-600' : 'text-emerald-600'}>{formatMoney(data.totals.net, data.cur)}</p>
-        </div>
-      </div>
-
-      <section className="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-900">
-        <h2 className="mb-2 text-sm text-gray-500">{t('monthlyReport')}</h2>
+      <Card title={t('monthlyReport')}>
         <MonthlyBar data={data.monthly} />
-      </section>
+      </Card>
 
-      <section className="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-900">
-        <h2 className="mb-2 text-sm text-gray-500">{t('topCategory')}</h2>
+      <Card title={t('topCategory')}>
         <CategoryPie data={data.pie} />
-      </section>
+      </Card>
 
       <section className="grid grid-cols-2 gap-2">
         <Stat label={t('largestExpense')} value={data.stats.largestExpense ? formatMoney(data.stats.largestExpense.amount, data.cur) : '—'} />
@@ -105,9 +101,9 @@ export function ReportsPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-white p-3 shadow-sm dark:bg-gray-900">
-      <p className="text-xs text-gray-500">{label}</p>
-      <p className="font-medium tabular-nums">{value}</p>
+    <div className="rounded-2xl bg-surface p-3.5 shadow-soft">
+      <p className="text-xs text-muted">{label}</p>
+      <p className="font-semibold tabular-nums text-ink">{value}</p>
     </div>
   )
 }

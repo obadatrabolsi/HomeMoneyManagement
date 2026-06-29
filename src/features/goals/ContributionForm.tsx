@@ -23,16 +23,16 @@ export function ContributionForm({ goalId, onDone }: { goalId: string; onDone: (
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3">
+    <form onSubmit={submit} className="space-y-4">
       <Field label={t('amount')}>
-        <input aria-label={t('amount')} className="w-full rounded-lg border p-2" inputMode="decimal"
+        <input aria-label={t('amount')} className="input" inputMode="decimal"
           value={amount} onChange={(e) => setAmount(e.target.value)} />
       </Field>
       <Field label={t('notes')}>
-        <input className="w-full rounded-lg border p-2" value={note} onChange={(e) => setNote(e.target.value)} />
+        <input className="input" value={note} onChange={(e) => setNote(e.target.value)} />
       </Field>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <Button type="submit">{t('save')}</Button>
+      {error && <p className="text-sm font-medium text-expense">{error}</p>}
+      <Button type="submit" variant="primary" className="w-full">{t('save')}</Button>
     </form>
   )
 }

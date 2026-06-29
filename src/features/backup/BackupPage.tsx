@@ -7,6 +7,8 @@ import { db } from '../../db/schema'
 import { applyTheme } from '../../lib/theme'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
+import { Card } from '../../components/ui/Card'
+import { SegmentedControl } from '../../components/ui/SegmentedControl'
 import { t } from '../../i18n/ar'
 import type { Settings } from '../../db/types'
 
@@ -41,37 +43,42 @@ export function BackupPage() {
     }
   }
 
-  const handleThemeChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newTheme = e.target.value as Settings['theme']
+  const handleThemeChange = async (newTheme: Settings['theme']) => {
     await updateSettings({ theme: newTheme })
     applyTheme(newTheme)
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-bold">{t('settings')}</h1>
-      <Field label={t('appearance')}>
-        <select
-          value={theme}
-          onChange={handleThemeChange}
-          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
+    <div className="animate-fade-in space-y-4">
+      <h1 className="text-xl font-bold text-ink">{t('settings')}</h1>
+      <Card>
+        <Field label={t('appearance')}>
+          <SegmentedControl
+            options={[
+              { value: 'system', label: t('themeSystem') },
+              { value: 'light', label: t('themeLight') },
+              { value: 'dark', label: t('themeDark') },
+            ]}
+            value={theme}
+            onChange={(v) => handleThemeChange(v as Settings['theme'])}
+          />
+        </Field>
+      </Card>
+      <Card title={t('settings')}>
+        <nav className="flex flex-wrap gap-2">
+          <Link to="/goals" className="rounded-full bg-surface-2 px-3.5 py-1.5 text-sm font-medium text-ink">{t('goals')}</Link>
+          <Link to="/budgets" className="rounded-full bg-surface-2 px-3.5 py-1.5 text-sm font-medium text-ink">{t('budgets')}</Link>
+          <Link to="/categories" className="rounded-full bg-surface-2 px-3.5 py-1.5 text-sm font-medium text-ink">{t('categories')}</Link>
+          <Link to="/recurring" className="rounded-full bg-surface-2 px-3.5 py-1.5 text-sm font-medium text-ink">{t('recurring')}</Link>
+          <Link to="/debts" className="rounded-full bg-surface-2 px-3.5 py-1.5 text-sm font-medium text-ink">{t('debts')}</Link>
+          <Link to="/reports" className="rounded-full bg-surface-2 px-3.5 py-1.5 text-sm font-medium text-ink">{t('reports')}</Link>
+        </nav>
+      </Card>
+      <div className="flex flex-col gap-2">
+        <Button onClick={doExport}>{t('exportBackup')}</Button>
+        <label
+          className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-expense px-5 py-2.5 font-semibold text-white transition hover:brightness-105 active:scale-95"
         >
-          <option value="system">{t('themeSystem')}</option>
-          <option value="light">{t('themeLight')}</option>
-          <option value="dark">{t('themeDark')}</option>
-        </select>
-      </Field>
-      <nav className="flex flex-wrap gap-2">
-        <Link to="/goals" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('goals')}</Link>
-        <Link to="/budgets" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('budgets')}</Link>
-        <Link to="/categories" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('categories')}</Link>
-        <Link to="/recurring" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('recurring')}</Link>
-        <Link to="/debts" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('debts')}</Link>
-        <Link to="/reports" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('reports')}</Link>
-      </nav>
-      <Button onClick={doExport}>{t('exportBackup')}</Button>
-      <div>
-        <label className="inline-block cursor-pointer rounded-xl bg-gray-200 px-4 py-2 dark:bg-gray-800">
           {t('importBackup')}
           <input ref={fileRef} type="file" accept="application/json" className="hidden" onChange={doImport} />
         </label>

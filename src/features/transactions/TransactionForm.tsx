@@ -7,6 +7,7 @@ import { parseAmount } from '../../lib/money'
 import { isoDate } from '../../lib/date'
 import { Field } from '../../components/ui/Field'
 import { Button } from '../../components/ui/Button'
+import { SegmentedControl } from '../../components/ui/SegmentedControl'
 import { t } from '../../i18n/ar'
 import type { TransactionType } from '../../db/types'
 
@@ -45,40 +46,42 @@ export function TransactionForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <div className="flex gap-2">
-        {(['expense', 'income', 'transfer'] as TransactionType[]).map((ty) => (
-          <Button key={ty} type="button" variant={type === ty ? 'primary' : 'ghost'} onClick={() => setType(ty)}>
-            {t(ty)}
-          </Button>
-        ))}
-      </div>
+      <SegmentedControl<TransactionType>
+        options={[
+          { value: 'expense', label: t('expense') },
+          { value: 'income', label: t('income') },
+          { value: 'transfer', label: t('transfer') },
+        ]}
+        value={type}
+        onChange={setType}
+      />
       <Field label={t('amount')}>
-        <input aria-label={t('amount')} className="w-full rounded-lg border p-2" inputMode="decimal"
+        <input aria-label={t('amount')} className="input" inputMode="decimal"
           value={amount} onChange={(e) => setAmount(e.target.value)} />
       </Field>
       <Field label={type === 'transfer' ? t('from') : t('account')}>
-        <select className="w-full rounded-lg border p-2" value={accountId} onChange={(e) => setAccountId(e.target.value)}>
+        <select className="input" value={accountId} onChange={(e) => setAccountId(e.target.value)}>
           <option value="">—</option>
           {accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
       </Field>
       {type === 'transfer' ? (
         <Field label={t('to')}>
-          <select className="w-full rounded-lg border p-2" value={toAccountId} onChange={(e) => setToAccountId(e.target.value)}>
+          <select className="input" value={toAccountId} onChange={(e) => setToAccountId(e.target.value)}>
             <option value="">—</option>
             {accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
           </select>
         </Field>
       ) : (
         <Field label={t('category')}>
-          <select className="w-full rounded-lg border p-2" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+          <select className="input" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
             <option value="">—</option>
             {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </Field>
       )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <Button type="submit">{t('save')}</Button>
+      {error && <p className="text-sm font-medium text-expense">{error}</p>}
+      <Button type="submit" variant="primary" className="w-full">{t('save')}</Button>
     </form>
   )
 }

@@ -7,6 +7,7 @@ import { parseAmount } from '../../lib/money'
 import { isoDate } from '../../lib/date'
 import { Field } from '../../components/ui/Field'
 import { Button } from '../../components/ui/Button'
+import { SegmentedControl } from '../../components/ui/SegmentedControl'
 import { t } from '../../i18n/ar'
 import type { RecurringFrequency } from '../../db/types'
 
@@ -50,46 +51,49 @@ export function RecurringForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <div className="flex gap-2">
-        {(['expense', 'income'] as const).map((ty) => (
-          <Button key={ty} type="button" variant={type === ty ? 'primary' : 'ghost'} onClick={() => setType(ty)}>{t(ty)}</Button>
-        ))}
-      </div>
+      <SegmentedControl
+        options={[
+          { value: 'expense', label: t('expense') },
+          { value: 'income', label: t('income') },
+        ]}
+        value={type}
+        onChange={(v) => setType(v as 'income' | 'expense')}
+      />
       <Field label={t('amount')}>
-        <input aria-label={t('amount')} className="w-full rounded-lg border p-2" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        <input aria-label={t('amount')} className="input" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
       </Field>
       <Field label={t('account')}>
-        <select className="w-full rounded-lg border p-2" value={accountId} onChange={(e) => setAccountId(e.target.value)}>
+        <select className="input" value={accountId} onChange={(e) => setAccountId(e.target.value)}>
           <option value="">—</option>
           {accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
       </Field>
       <Field label={t('category')}>
-        <select className="w-full rounded-lg border p-2" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+        <select className="input" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
           <option value="">—</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </Field>
       <Field label={t('merchant')}>
-        <input className="w-full rounded-lg border p-2" value={merchant} onChange={(e) => setMerchant(e.target.value)} />
+        <input className="input" value={merchant} onChange={(e) => setMerchant(e.target.value)} />
       </Field>
       <div className="flex gap-2">
         <Field label={t('every')}>
-          <input className="w-20 rounded-lg border p-2" inputMode="numeric" value={interval} onChange={(e) => setInterval(e.target.value)} />
+          <input className="input w-20" inputMode="numeric" value={interval} onChange={(e) => setInterval(e.target.value)} />
         </Field>
         <Field label={t('frequency')}>
-          <select className="w-full rounded-lg border p-2" value={frequency} onChange={(e) => setFrequency(e.target.value as RecurringFrequency)}>
+          <select className="input" value={frequency} onChange={(e) => setFrequency(e.target.value as RecurringFrequency)}>
             {freqs.map((f) => <option key={f} value={f}>{t(f)}</option>)}
           </select>
         </Field>
       </div>
       <Field label={t('startDate')}>
-        <input type="date" className="w-full rounded-lg border p-2" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        <input type="date" className="input" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
       </Field>
       <Field label={t('endDate')}>
-        <input type="date" className="w-full rounded-lg border p-2" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        <input type="date" className="input" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
       </Field>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm font-medium text-expense">{error}</p>}
       <Button type="submit">{t('save')}</Button>
     </form>
   )

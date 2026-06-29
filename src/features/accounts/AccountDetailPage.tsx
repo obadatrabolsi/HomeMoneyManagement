@@ -5,6 +5,7 @@ import { accountBalance, archiveAccount } from '../../db/accountsRepo'
 import { queryTransactions } from '../../db/transactionsRepo'
 import { formatMoney } from '../../lib/money'
 import { Button } from '../../components/ui/Button'
+import { IconBadge } from '../../components/ui/IconBadge'
 import { TransactionRow } from '../transactions/TransactionRow'
 import { t } from '../../i18n/ar'
 
@@ -20,13 +21,21 @@ export function AccountDetailPage() {
 
   if (!data) return null
   return (
-    <div className="space-y-3">
-      <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900">
-        <h1 className="text-xl font-bold">{data.account.name}</h1>
-        <p className="text-2xl tabular-nums">{formatMoney(data.balance, data.account.currency)}</p>
-        <Button variant="danger" className="mt-2" onClick={() => archiveAccount(id)}>{t('archive')}</Button>
+    <div className="animate-fade-in space-y-4">
+      <div className="rounded-3xl bg-surface p-4 shadow-soft">
+        <div className="flex items-center gap-3">
+          <IconBadge icon={data.account.icon} color={data.account.color} size="lg" />
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-xl font-bold text-ink">{data.account.name}</h1>
+            <p className="text-xs text-muted">{data.account.currency}</p>
+          </div>
+        </div>
+        <p className="mt-3 text-2xl font-bold tabular-nums text-ink">{formatMoney(data.balance, data.account.currency)}</p>
+        <Button variant="danger" className="mt-3" onClick={() => archiveAccount(id)}>{t('archive')}</Button>
       </div>
-      {data.txs.map((tx) => <TransactionRow key={tx.id} tx={tx} currency={data.account.currency} />)}
+      <div className="space-y-3">
+        {data.txs.map((tx) => <TransactionRow key={tx.id} tx={tx} currency={data.account.currency} />)}
+      </div>
     </div>
   )
 }

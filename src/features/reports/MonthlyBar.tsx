@@ -7,8 +7,8 @@ export function MonthlyBar({ data }: { data: Array<{ month: string; income: numb
       <ResponsiveContainer>
         <BarChart data={chart}>
           <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-          <Bar dataKey="income" fill="#10b981" />
-          <Bar dataKey="expense" fill="#ef4444" />
+          <Bar dataKey="income" fill="#10B981" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="expense" fill="#F43F5E" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

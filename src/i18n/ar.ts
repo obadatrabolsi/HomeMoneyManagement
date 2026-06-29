@@ -1,5 +1,6 @@
 export const strings = {
   appName: 'مدير الأموال',
+  greeting: 'أهلاً بك 👋',
   dashboard: 'الرئيسية',
   accounts: 'الحسابات',
   transactions: 'العمليات',

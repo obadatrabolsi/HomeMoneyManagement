@@ -5,6 +5,7 @@ import { createDebt } from '../../db/debtsRepo'
 import { parseAmount } from '../../lib/money'
 import { Field } from '../../components/ui/Field'
 import { Button } from '../../components/ui/Button'
+import { SegmentedControl } from '../../components/ui/SegmentedControl'
 import { t } from '../../i18n/ar'
 import type { DebtDirection } from '../../db/types'
 
@@ -36,26 +37,26 @@ export function DebtForm({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3">
-      <div className="flex gap-2">
-        {(['owe', 'owed'] as DebtDirection[]).map((d) => (
-          <Button key={d} type="button" variant={direction === d ? 'primary' : 'ghost'} onClick={() => setDirection(d)}>{t(d)}</Button>
-        ))}
-      </div>
+    <form onSubmit={submit} className="space-y-4">
+      <SegmentedControl<DebtDirection>
+        options={(['owe', 'owed'] as DebtDirection[]).map((d) => ({ value: d, label: t(d) }))}
+        value={direction}
+        onChange={setDirection}
+      />
       <Field label={t('person')}>
-        <input className="w-full rounded-lg border p-2" value={person} onChange={(e) => setPerson(e.target.value)} />
+        <input className="input" value={person} onChange={(e) => setPerson(e.target.value)} />
       </Field>
       <Field label={t('amount')}>
-        <input aria-label={t('amount')} className="w-full rounded-lg border p-2" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        <input aria-label={t('amount')} className="input" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
       </Field>
       <Field label={t('dueDate')}>
-        <input type="date" className="w-full rounded-lg border p-2" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+        <input type="date" className="input" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
       </Field>
       <Field label={t('notes')}>
-        <input className="w-full rounded-lg border p-2" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <input className="input" value={notes} onChange={(e) => setNotes(e.target.value)} />
       </Field>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <Button type="submit">{t('save')}</Button>
+      {error && <p className="text-sm font-medium text-expense">{error}</p>}
+      <Button type="submit" variant="primary" className="w-full">{t('save')}</Button>
     </form>
   )
 }

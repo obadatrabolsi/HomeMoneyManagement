@@ -36,22 +36,22 @@ export function GoalForm({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3">
+    <form onSubmit={submit} className="space-y-4">
       <Field label={t('name')}>
-        <input className="w-full rounded-lg border p-2" value={name} onChange={(e) => setName(e.target.value)} />
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
       </Field>
       <Field label={t('targetAmount')}>
-        <input aria-label={t('targetAmount')} className="w-full rounded-lg border p-2" inputMode="decimal"
+        <input aria-label={t('targetAmount')} className="input" inputMode="decimal"
           value={target} onChange={(e) => setTarget(e.target.value)} />
       </Field>
       <Field label={t('targetDate')}>
-        <input type="date" className="w-full rounded-lg border p-2" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} />
+        <input type="date" className="input" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} />
       </Field>
       <Field label={t('notes')}>
-        <input className="w-full rounded-lg border p-2" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <input className="input" value={notes} onChange={(e) => setNotes(e.target.value)} />
       </Field>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <Button type="submit">{t('save')}</Button>
+      {error && <p className="text-sm font-medium text-expense">{error}</p>}
+      <Button type="submit" variant="primary" className="w-full">{t('save')}</Button>
     </form>
   )
 }

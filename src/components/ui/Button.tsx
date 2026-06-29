@@ -1,11 +1,12 @@
 import type { ButtonHTMLAttributes } from 'react'
 
-type Variant = 'primary' | 'ghost' | 'danger'
+type Variant = 'primary' | 'ghost' | 'danger' | 'soft'
 
 const styles: Record<Variant, string> = {
-  primary: 'bg-emerald-600 text-white hover:bg-emerald-700',
-  ghost: 'bg-transparent text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800',
-  danger: 'bg-red-600 text-white hover:bg-red-700',
+  primary: 'bg-grad-brand text-white shadow-brand hover:brightness-105',
+  soft: 'bg-brand/10 text-brand hover:bg-brand/15',
+  ghost: 'bg-transparent text-muted hover:bg-surface-2 hover:text-ink',
+  danger: 'bg-expense text-white hover:brightness-105',
 }
 
 export function Button({
@@ -16,7 +17,9 @@ export function Button({
   return (
     <button
       {...props}
-      className={`rounded-xl px-4 py-2 font-medium transition disabled:opacity-50 ${styles[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-semibold transition
+        active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40
+        disabled:opacity-50 disabled:active:scale-100 ${styles[variant]} ${className}`}
     />
   )
 }
