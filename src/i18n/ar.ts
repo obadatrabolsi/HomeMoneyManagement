@@ -56,7 +56,6 @@ export const strings = {
   current: 'الحالي',
   addContribution: 'إضافة مبلغ',
   reached: 'تم الإنجاز ✓',
-  more: 'المزيد',
 } as const
 
 export function t(key: keyof typeof strings): string {

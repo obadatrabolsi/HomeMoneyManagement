@@ -28,7 +28,7 @@ export function GoalsPage() {
             <span className="font-medium" style={{ color: p.goal.color }}>{p.goal.name}</span>
             <div className="flex items-center gap-3">
               {p.reached && <span className="text-xs text-emerald-600">{t('reached')}</span>}
-              <button aria-label={t('archive')} onClick={() => archiveGoal(p.goal.id)}>🗑</button>
+              <button aria-label={t('archive')} onClick={async () => { if (window.confirm('أرشفة هذا الهدف؟')) await archiveGoal(p.goal.id) }}>🗑</button>
             </div>
           </div>
           <GoalBar percent={p.percent} reached={p.reached} />
