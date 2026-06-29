@@ -106,3 +106,57 @@ export async function createTransfer(
 
   return { groupId, outId, inId }
 }
+
+export interface TxFilter {
+  accountId?: string
+  type?: TransactionType
+  categoryId?: string
+  tags?: string[]
+  from?: string
+  to?: string
+  text?: string
+  sort?: 'date_desc' | 'date_asc' | 'amount_desc' | 'amount_asc'
+}
+
+function matchesText(tx: Transaction, text: string): boolean {
+  const q = text.trim().toLowerCase()
+  if (q === '') return true
+  const haystack = [tx.notes, tx.merchant, ...(tx.tags ?? [])]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+  if (haystack.includes(q)) return true
+  const asNumber = Number(q)
+  if (!isNaN(asNumber) && Math.round(asNumber * 100) === tx.amount) return true
+  return false
+}
+
+function sortTxs(rows: Transaction[], sort: TxFilter['sort']): Transaction[] {
+  const s = sort ?? 'date_desc'
+  return [...rows].sort((a, b) => {
+    switch (s) {
+      case 'date_asc': return a.date.localeCompare(b.date) || a.createdAt.localeCompare(b.createdAt)
+      case 'amount_desc': return b.amount - a.amount
+      case 'amount_asc': return a.amount - b.amount
+      case 'date_desc':
+      default: return b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt)
+    }
+  })
+}
+
+export async function queryTransactions(filter: TxFilter): Promise<Transaction[]> {
+  let rows = (await db.transactions.toArray()).filter(t => !t.deletedAt)
+  if (filter.accountId) rows = rows.filter(t => t.accountId === filter.accountId)
+  if (filter.type) rows = rows.filter(t => t.type === filter.type)
+  if (filter.categoryId) rows = rows.filter(t => t.categoryId === filter.categoryId)
+  if (filter.tags?.length) rows = rows.filter(t => filter.tags!.every(tag => t.tags.includes(tag)))
+  if (filter.from) rows = rows.filter(t => t.date >= filter.from!)
+  if (filter.to) rows = rows.filter(t => t.date <= filter.to!)
+  if (filter.text) rows = rows.filter(t => matchesText(t, filter.text!))
+  return sortTxs(rows, filter.sort)
+}
+
+export async function recentTransactions(limit: number): Promise<Transaction[]> {
+  const rows = (await db.transactions.toArray()).filter(t => !t.deletedAt)
+  return sortTxs(rows, 'date_desc').slice(0, limit)
+}
