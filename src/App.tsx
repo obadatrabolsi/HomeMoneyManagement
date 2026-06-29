@@ -9,6 +9,7 @@ import { BackupPage } from './features/backup/BackupPage'
 import { BudgetsPage } from './features/budgets/BudgetsPage'
 import { GoalsPage } from './features/goals/GoalsPage'
 import { RecurringPage } from './features/recurring/RecurringPage'
+import { DebtsPage } from './features/debts/DebtsPage'
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/goals" element={<GoalsPage />} />
           <Route path="/settings" element={<BackupPage />} />
           <Route path="/recurring" element={<RecurringPage />} />
+          <Route path="/debts" element={<DebtsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

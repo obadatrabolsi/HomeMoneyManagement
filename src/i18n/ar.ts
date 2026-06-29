@@ -68,6 +68,15 @@ export const strings = {
   endDate: 'تاريخ النهاية',
   nextRun: 'التشغيل التالي',
   active: 'نشِطة',
+  debts: 'الديون والقروض',
+  owe: 'عليّ',
+  owed: 'لي',
+  person: 'الشخص',
+  addDebt: 'إضافة دين',
+  addPayment: 'إضافة دفعة',
+  paid: 'المدفوع',
+  settled: 'مسوّى ✓',
+  dueDate: 'تاريخ الاستحقاق',
 } as const
 
 export function t(key: keyof typeof strings): string {
