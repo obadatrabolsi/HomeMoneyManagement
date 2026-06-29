@@ -42,6 +42,7 @@ export function BackupPage() {
         <Link to="/categories" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('categories')}</Link>
         <Link to="/recurring" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('recurring')}</Link>
         <Link to="/debts" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('debts')}</Link>
+        <Link to="/reports" className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">{t('reports')}</Link>
       </nav>
       <Button onClick={doExport}>{t('exportBackup')}</Button>
       <div>

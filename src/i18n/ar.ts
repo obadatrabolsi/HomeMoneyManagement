@@ -77,6 +77,18 @@ export const strings = {
   paid: 'المدفوع',
   settled: 'مسوّى ✓',
   dueDate: 'تاريخ الاستحقاق',
+  reports: 'التقارير',
+  period: 'الفترة',
+  thisMonth: 'هذا الشهر',
+  lastMonth: 'الشهر الماضي',
+  thisYear: 'هذه السنة',
+  largestExpense: 'أكبر مصروف',
+  largestIncome: 'أكبر دخل',
+  avgDailyExpense: 'متوسط الإنفاق اليومي',
+  topCategory: 'أكثر تصنيف إنفاقًا',
+  mostUsedAccount: 'أكثر حساب استخدامًا',
+  transactionCount: 'عدد العمليات',
+  monthlyReport: 'التقرير الشهري',
 } as const
 
 export function t(key: keyof typeof strings): string {
