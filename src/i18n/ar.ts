@@ -88,6 +88,7 @@ export const strings = {
   topCategory: 'أكثر تصنيف إنفاقًا',
   mostUsedAccount: 'أكثر حساب استخدامًا',
   transactionCount: 'عدد العمليات',
+  monthlyReport: 'التقرير الشهري',
 } as const
 
 export function t(key: keyof typeof strings): string {

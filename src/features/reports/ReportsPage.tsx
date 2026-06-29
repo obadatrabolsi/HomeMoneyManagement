@@ -32,7 +32,7 @@ export function ReportsPage() {
 
   const data = useLiveQuery(async () => {
     const settings = await db.settings.get('singleton')
-    const accounts = await listAccounts()
+    const accounts = await listAccounts(true)
     const currencies = [...new Set(accounts.map((a) => a.currency))]
     const cur = currency || settings?.defaultCurrency || currencies[0] || 'EUR'
     const { from, to, year } = periodRange(period)
@@ -82,7 +82,7 @@ export function ReportsPage() {
       </div>
 
       <section className="rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-900">
-        <h2 className="mb-2 text-sm text-gray-500">{t('monthly')}</h2>
+        <h2 className="mb-2 text-sm text-gray-500">{t('monthlyReport')}</h2>
         <MonthlyBar data={data.monthly} />
       </section>
 
