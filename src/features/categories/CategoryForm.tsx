@@ -18,7 +18,7 @@ export function CategoryForm({ type, onDone }: { type: CategoryType; onDone: () 
     await createCategory({
       name: name.trim(),
       type,
-      icon: 'tag',
+      icon: '🏷️',
       color: '#64748b',
       ...(parentId ? { parentId } : {}),
     })
