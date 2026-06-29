@@ -12,3 +12,7 @@ export function todayRange(now: Date): { start: string; end: string } {
 export function monthRange(now: Date): { start: string; end: string } {
   return { start: isoDate(startOfMonth(now)), end: isoDate(endOfMonth(now)) }
 }
+
+export function isoMonth(d: Date): string {
+  return format(d, 'yyyy-MM')
+}

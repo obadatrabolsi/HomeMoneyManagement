@@ -53,3 +53,13 @@ export interface Settings {
   theme: 'light' | 'dark' | 'system'
   schemaVersion: number
 }
+
+export interface Budget {
+  id: string
+  categoryId: string
+  month: string // yyyy-MM
+  amount: number // cents
+  currency: string
+  createdAt: string
+  updatedAt: string
+}

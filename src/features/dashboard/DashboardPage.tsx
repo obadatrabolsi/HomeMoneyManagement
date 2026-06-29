@@ -1,10 +1,13 @@
 import { useLiveQuery } from 'dexie-react-hooks'
+import { Link } from 'react-router-dom'
 import { totalsByCurrency, listAccounts } from '../../db/accountsRepo'
 import { dayTotalsByCurrency, rangeTotalsByCurrency, categoryBreakdown, recentTransactions } from '../../db/transactionsRepo'
 import { listCategories } from '../../db/categoriesRepo'
-import { isoDate, monthRange } from '../../lib/date'
+import { budgetProgress } from '../../db/budgetsRepo'
+import { isoDate, monthRange, isoMonth } from '../../lib/date'
 import { formatMoney } from '../../lib/money'
 import { CategoryPie } from './CategoryPie'
+import { BudgetBar } from '../budgets/BudgetBar'
 import { TransactionRow } from '../transactions/TransactionRow'
 import { t } from '../../i18n/ar'
 
@@ -20,11 +23,12 @@ export function DashboardPage() {
     const cats = await listCategories('expense')
     const catName = (id: string | null) => cats.find((c) => c.id === id)?.name ?? 'أخرى'
     const pie = breakdown.map((b) => ({ name: catName(b.categoryId), value: b.total / 100 }))
+    const budgets = (await budgetProgress(isoMonth(now))).slice(0, 3).map(p => ({ ...p, categoryName: catName(p.budget.categoryId) }))
     const recent = await recentTransactions(5)
     const accounts = await listAccounts()
     const accCur: Record<string, string> = {}
     for (const a of accounts) accCur[a.id] = a.currency
-    return { totals, dayByCur, monthByCur, pie, recent, accCur }
+    return { totals, dayByCur, monthByCur, pie, budgets, recent, accCur }
   }, [], undefined)
 
   if (!data) return null
@@ -91,6 +95,23 @@ export function DashboardPage() {
         <h2 className="mb-2 text-sm text-gray-500">{t('expenseDistribution')}</h2>
         <CategoryPie data={data.pie} />
       </section>
+      {data.budgets.length > 0 && (
+        <section className="space-y-2 rounded-2xl bg-white p-4 shadow-sm dark:bg-gray-900">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm text-gray-500">{t('budgetProgress')}</h2>
+            <Link to="/budgets" className="text-xs text-emerald-600">{t('viewAll')}</Link>
+          </div>
+          {data.budgets.map((p) => (
+            <div key={p.budget.id} className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span>{p.categoryName}</span>
+                <span className={p.status === 'over' ? 'text-red-600' : 'text-gray-500'}>{p.percent}%</span>
+              </div>
+              <BudgetBar percent={p.percent} status={p.status} />
+            </div>
+          ))}
+        </section>
+      )}
       <section className="space-y-2">
         <h2 className="text-sm text-gray-500">{t('recent')}</h2>
         {data.recent.map((tx) => <TransactionRow key={tx.id} tx={tx} currency={data.accCur[tx.accountId] ?? 'EUR'} />)}
