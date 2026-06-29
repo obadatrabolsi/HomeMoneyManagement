@@ -175,6 +175,29 @@ export async function rangeTotals(from: string, to: string): Promise<{ income: n
   }
 }
 
+export async function rangeTotalsByCurrency(
+  from: string,
+  to: string,
+): Promise<Record<string, { income: number; expense: number }>> {
+  const [accounts, rows] = await Promise.all([db.accounts.toArray(), db.transactions.toArray()])
+  const cur: Record<string, string> = {}
+  for (const a of accounts) cur[a.id] = a.currency
+  const out: Record<string, { income: number; expense: number }> = {}
+  for (const tx of rows) {
+    if (tx.deletedAt || tx.date < from || tx.date > to) continue
+    if (tx.type !== 'income' && tx.type !== 'expense') continue
+    const c = cur[tx.accountId] ?? 'EUR'
+    out[c] ??= { income: 0, expense: 0 }
+    if (tx.type === 'income') out[c].income += tx.amount
+    else out[c].expense += tx.amount
+  }
+  return out
+}
+
+export async function dayTotalsByCurrency(date: string): Promise<Record<string, { income: number; expense: number }>> {
+  return rangeTotalsByCurrency(date, date)
+}
+
 export async function categoryBreakdown(
   from: string,
   to: string,

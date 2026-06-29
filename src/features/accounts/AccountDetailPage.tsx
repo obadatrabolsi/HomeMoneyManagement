@@ -26,7 +26,7 @@ export function AccountDetailPage() {
         <p className="text-2xl tabular-nums">{formatMoney(data.balance, data.account.currency)}</p>
         <Button variant="danger" className="mt-2" onClick={() => archiveAccount(id)}>{t('archive')}</Button>
       </div>
-      {data.txs.map((tx) => <TransactionRow key={tx.id} tx={tx} />)}
+      {data.txs.map((tx) => <TransactionRow key={tx.id} tx={tx} currency={data.account.currency} />)}
     </div>
   )
 }

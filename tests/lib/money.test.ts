@@ -14,6 +14,8 @@ describe('money', () => {
     expect(parseAmount('12.5')).toBe(1250)
     expect(parseAmount('1٬234.50')).toBe(123450) // arabic thousands sep stripped
     expect(() => parseAmount('abc')).toThrow()
+    expect(parseAmount('12,50')).toBe(1250)   // comma as decimal when no dot present
+    expect(parseAmount('12٫5')).toBe(1250)    // arabic decimal separator
   })
   it('formats cents with currency', () => {
     expect(formatMoney(123450, 'EUR')).toContain('1') // smoke: non-empty localized

@@ -7,14 +7,16 @@ export function fromCents(cents: number): number {
 }
 
 export function parseAmount(input: string): number {
-  const normalized = input
-    .replace(/[٬,\s]/g, '')   // strip thousands separators (arabic + latin)
-    .replace(/٫/g, '.')       // arabic decimal sep -> dot
-    .trim()
-  if (normalized === '' || isNaN(Number(normalized))) {
+  let s = input.replace(/\s/g, '').replace(/٫/g, '.') // arabic decimal -> dot
+  if (s.includes('.')) {
+    s = s.replace(/[,٬]/g, '')        // dot is decimal; strip thousands separators
+  } else {
+    s = s.replace(/[,٬]/g, '.')       // no dot; a comma is the decimal separator
+  }
+  if (s === '' || isNaN(Number(s))) {
     throw new Error(`Invalid amount: ${input}`)
   }
-  return toCents(Number(normalized))
+  return toCents(Number(s))
 }
 
 export function formatMoney(cents: number, currency: string): string {

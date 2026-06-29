@@ -11,7 +11,7 @@ describe('TransactionRow', () => {
     const onDeleted = vi.fn()
     const tx = { id: 't1', type: 'expense' as const, amount: 1250, accountId: 'a1', date: '2026-06-01', tags: [], createdAt: 't', updatedAt: 't' }
     await db.transactions.add(tx)
-    render(<TransactionRow tx={tx} onDeleted={onDeleted} />)
+    render(<TransactionRow tx={tx} currency="EUR" onDeleted={onDeleted} />)
     await userEvent.click(screen.getByLabelText('حذف'))
     await waitFor(() => expect(onDeleted).toHaveBeenCalledWith(['t1']))
   })

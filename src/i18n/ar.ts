@@ -40,6 +40,8 @@ export const strings = {
   importWarning: 'الاستيراد سيستبدل كل بياناتك الحالية. هل أنت متأكد؟',
   deleted: 'تم الحذف',
   sameCurrencyOnly: 'التحويل متاح بين حسابات بنفس العملة فقط',
+  net: 'الصافي',
+  expenseDistribution: 'توزيع المصروفات',
 } as const
 
 export function t(key: keyof typeof strings): string {

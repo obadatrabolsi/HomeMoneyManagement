@@ -9,7 +9,7 @@ const color: Record<Transaction['type'], string> = {
   transfer: 'text-sky-600',
 }
 
-export function TransactionRow({ tx, currency = 'EUR', onDeleted }: { tx: Transaction; currency?: string; onDeleted?: (ids: string[]) => void }) {
+export function TransactionRow({ tx, currency, onDeleted }: { tx: Transaction; currency: string; onDeleted?: (ids: string[]) => void }) {
   const sign = tx.type === 'expense' || (tx.type === 'transfer' && tx.transferDirection === 'out') ? '-' : '+'
   return (
     <div className="flex items-center justify-between rounded-xl bg-white p-3 shadow-sm dark:bg-gray-900">

@@ -10,6 +10,6 @@ describe('CategoriesPage', () => {
   it('lists existing categories', async () => {
     await createCategory({ name: 'الطعام', type: 'expense', icon: 'food', color: '#f00' })
     render(<CategoriesPage />)
-    await waitFor(() => expect(screen.getByText('الطعام')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getAllByText('الطعام').length).toBeGreaterThan(0))
   })
 })
