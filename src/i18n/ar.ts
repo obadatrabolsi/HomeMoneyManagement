@@ -56,6 +56,18 @@ export const strings = {
   current: 'الحالي',
   addContribution: 'إضافة مبلغ',
   reached: 'تم الإنجاز ✓',
+  recurring: 'العمليات المتكررة',
+  addRecurring: 'إضافة عملية متكررة',
+  frequency: 'التكرار',
+  every: 'كل',
+  daily: 'يوم',
+  weekly: 'أسبوع',
+  monthly: 'شهر',
+  yearly: 'سنة',
+  startDate: 'تاريخ البداية',
+  endDate: 'تاريخ النهاية',
+  nextRun: 'التشغيل التالي',
+  active: 'نشِطة',
 } as const
 
 export function t(key: keyof typeof strings): string {
