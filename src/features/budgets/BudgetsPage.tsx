@@ -32,7 +32,7 @@ export function BudgetsPage() {
         <div key={p.budget.id} className="space-y-2 rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900">
           <div className="flex items-center justify-between">
             <span className="font-medium">{p.categoryName}</span>
-            <button aria-label={t('delete')} onClick={() => deleteBudget(p.budget.id)}>🗑</button>
+            <button aria-label={t('delete')} onClick={async () => { if (window.confirm('حذف هذه الميزانية؟')) await deleteBudget(p.budget.id) }}>🗑</button>
           </div>
           <BudgetBar percent={p.percent} status={p.status} />
           <div className="flex justify-between text-xs text-gray-500">

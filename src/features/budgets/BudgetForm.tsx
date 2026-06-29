@@ -20,6 +20,7 @@ export function BudgetForm({ month, onDone }: { month?: string; onDone: () => vo
     e.preventDefault()
     setError('')
     try {
+      if (!categoryId) { setError('اختر تصنيفًا'); return }
       await createBudget({
         categoryId,
         month: month ?? isoMonth(new Date()),

@@ -43,7 +43,6 @@ export const strings = {
   net: 'الصافي',
   expenseDistribution: 'توزيع المصروفات',
   budgets: 'الميزانيات',
-  budget: 'الميزانية',
   spent: 'المصروف',
   remaining: 'المتبقي',
   addBudget: 'إضافة ميزانية',
