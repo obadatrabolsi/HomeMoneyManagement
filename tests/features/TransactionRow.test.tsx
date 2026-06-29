@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { db } from '../../src/db/schema'
 import { TransactionRow } from '../../src/features/transactions/TransactionRow'
@@ -13,6 +13,6 @@ describe('TransactionRow', () => {
     await db.transactions.add(tx)
     render(<TransactionRow tx={tx} onDeleted={onDeleted} />)
     await userEvent.click(screen.getByLabelText('حذف'))
-    expect(onDeleted).toHaveBeenCalled()
+    await waitFor(() => expect(onDeleted).toHaveBeenCalledWith(['t1']))
   })
 })

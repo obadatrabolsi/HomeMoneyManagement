@@ -22,13 +22,9 @@ export function TransactionRow({ tx, currency = 'EUR', onDeleted }: { tx: Transa
         <button aria-label="مفضلة" onClick={() => toggleFavorite(tx.id)}>{tx.isFavorite ? '★' : '☆'}</button>
         <button
           aria-label={t('delete')}
-          onClick={() => {
-            // Notify parent optimistically so UI can show undo toast immediately.
-            // For simple transactions, [tx.id] is always the correct set.
-            // softDeleteTransaction runs async to persist to DB; for transfer groups
-            // both legs are soft-deleted together by the repo.
-            onDeleted?.([tx.id])
-            softDeleteTransaction(tx.id)
+          onClick={async () => {
+            const ids = await softDeleteTransaction(tx.id)
+            onDeleted?.(ids)
           }}
         >🗑</button>
       </div>
