@@ -5,7 +5,7 @@ beforeEach(async () => { await db.delete(); await db.open() })
 
 describe('schema v2', () => {
   it('is version 2 and exposes the budgets table', () => {
-    expect(SCHEMA_VERSION).toBe(2)
+    expect(SCHEMA_VERSION).toBeGreaterThanOrEqual(2)
     expect(db.budgets).toBeTruthy()
   })
   it('round-trips a budget', async () => {
