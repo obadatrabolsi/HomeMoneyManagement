@@ -1,7 +1,8 @@
-/// <reference types="vitest" />
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default defineConfig({
   plugins: [react()],
   test: {
@@ -9,4 +10,4 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
   },
-})
+} as any)
