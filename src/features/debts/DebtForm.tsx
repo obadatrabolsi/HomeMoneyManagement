@@ -22,8 +22,10 @@ export function DebtForm({ onDone }: { onDone: () => void }) {
     setError('')
     if (!person.trim()) { setError('اسم الشخص مطلوب'); return }
     try {
+      const cents = parseAmount(amount)
+      if (!(cents > 0)) { setError('أدخل مبلغًا أكبر من صفر'); return }
       await createDebt({
-        direction, person: person.trim(), amount: parseAmount(amount),
+        direction, person: person.trim(), amount: cents,
         currency: settings?.defaultCurrency ?? 'EUR',
         dueDate: dueDate || undefined, notes: notes || undefined,
       })

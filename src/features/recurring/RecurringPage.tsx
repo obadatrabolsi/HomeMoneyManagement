@@ -27,7 +27,7 @@ export function RecurringPage() {
           </div>
           <div className="flex items-center gap-3">
             <span className={r.type === 'income' ? 'text-emerald-600' : 'text-red-600'}>{formatMoney(r.amount, 'EUR')}</span>
-            <button aria-label={t('active')} onClick={() => updateRule(r.id, { isActive: !r.isActive })}>{r.isActive ? '⏸' : '▶'}</button>
+            <button aria-label={t('active')} onClick={async () => { await updateRule(r.id, { isActive: !r.isActive }) }}>{r.isActive ? '⏸' : '▶'}</button>
             <button aria-label={t('delete')} onClick={async () => { if (window.confirm('حذف هذه العملية المتكررة؟')) await deleteRule(r.id) }}>🗑</button>
           </div>
         </div>

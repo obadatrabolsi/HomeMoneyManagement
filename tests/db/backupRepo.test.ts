@@ -24,4 +24,8 @@ describe('backupRepo', () => {
   it('rejects malformed json', async () => {
     await expect(importBackup('{not json')).rejects.toThrow('INVALID_BACKUP')
   })
+  it('rejects backup where optional table field is not an array', async () => {
+    const bad = JSON.stringify({ schemaVersion: 5, accounts: [], transactions: 'oops' })
+    await expect(importBackup(bad)).rejects.toThrow('INVALID_BACKUP')
+  })
 })

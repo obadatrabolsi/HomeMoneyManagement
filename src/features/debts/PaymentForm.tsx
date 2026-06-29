@@ -15,7 +15,9 @@ export function PaymentForm({ debtId, onDone }: { debtId: string; onDone: () => 
     e.preventDefault()
     setError('')
     try {
-      await addPayment({ debtId, amount: parseAmount(amount), date: isoDate(new Date()), note: note || undefined })
+      const cents = parseAmount(amount)
+      if (!(cents > 0)) { setError('أدخل مبلغًا أكبر من صفر'); return }
+      await addPayment({ debtId, amount: cents, date: isoDate(new Date()), note: note || undefined })
       onDone()
     } catch {
       setError('مبلغ غير صالح')

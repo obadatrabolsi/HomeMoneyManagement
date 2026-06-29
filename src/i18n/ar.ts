@@ -89,6 +89,10 @@ export const strings = {
   mostUsedAccount: 'أكثر حساب استخدامًا',
   transactionCount: 'عدد العمليات',
   monthlyReport: 'التقرير الشهري',
+  appearance: 'المظهر',
+  themeLight: 'فاتح',
+  themeDark: 'داكن',
+  themeSystem: 'حسب النظام',
 } as const
 
 export function t(key: keyof typeof strings): string {

@@ -21,10 +21,12 @@ export function BudgetForm({ month, onDone }: { month?: string; onDone: () => vo
     setError('')
     try {
       if (!categoryId) { setError('اختر تصنيفًا'); return }
+      const cents = parseAmount(amount)
+      if (!(cents > 0)) { setError('أدخل مبلغًا أكبر من صفر'); return }
       await createBudget({
         categoryId,
         month: month ?? isoMonth(new Date()),
-        amount: parseAmount(amount),
+        amount: cents,
         currency: settings?.defaultCurrency ?? 'EUR',
       })
       onDone()

@@ -29,6 +29,7 @@ export function TransactionForm({ onDone }: { onDone: () => void }) {
     setError('')
     try {
       const cents = parseAmount(amount)
+      if (!(cents > 0)) { setError('أدخل مبلغًا أكبر من صفر'); return }
       const date = isoDate(new Date())
       if (type === 'transfer') {
         await createTransfer({ fromAccountId: accountId, toAccountId, amount: cents, date })

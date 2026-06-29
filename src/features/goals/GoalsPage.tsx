@@ -33,7 +33,7 @@ export function GoalsPage() {
           </div>
           <GoalBar percent={p.percent} reached={p.reached} />
           <div className="flex justify-between text-xs text-gray-500">
-            <span>{t('current')}: {formatMoney(p.current, p.goal.currency)} / {formatMoney(p.goal.targetAmount, p.goal.currency)} ({p.percent}%)</span>
+            <span>{t('current')}: {formatMoney(p.current, p.goal.currency)} / {formatMoney(p.goal.targetAmount, p.goal.currency)} ({Math.max(p.percent, 0)}%)</span>
             {p.goal.targetDate && <span>{t('targetDate')}: {p.goal.targetDate}</span>}
           </div>
           <Button variant="ghost" onClick={() => setContributeTo(p.goal.id)}>{t('addContribution')}</Button>
