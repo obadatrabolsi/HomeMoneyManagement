@@ -91,6 +91,7 @@ export async function remainingTotalsByDirection(): Promise<{ owe: Record<string
   const progress = await debtsWithProgress()
   const totals = { owe: {} as Record<string, number>, owed: {} as Record<string, number> }
   for (const p of progress) {
+    if (p.settled) continue
     const bucket = totals[p.debt.direction]
     bucket[p.debt.currency] = (bucket[p.debt.currency] ?? 0) + p.remaining
   }

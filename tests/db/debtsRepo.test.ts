@@ -53,4 +53,17 @@ describe('debtsRepo', () => {
     expect(totals.owe).toEqual({ EUR: 7000, USD: 5000 })
     expect(totals.owed).toEqual({ EUR: 2000 })
   })
+  it('excludes manually settled debts from remaining totals', async () => {
+    // Manually settled debt (isSettled=true, no payments so paid=0, remaining would be 10000)
+    const settled = await createDebt({ direction: 'owe', person: 'X', amount: 10000, currency: 'EUR' })
+    await updateDebt(settled.id, { isSettled: true })
+    // Unsettled debt in same direction, different currency
+    await createDebt({ direction: 'owe', person: 'Y', amount: 5000, currency: 'USD' })
+
+    const totals = await remainingTotalsByDirection()
+    // EUR should not appear since the only EUR debt is settled
+    expect(totals.owe.EUR).toBeUndefined()
+    // USD unsettled debt is still counted
+    expect(totals.owe.USD).toBe(5000)
+  })
 })
