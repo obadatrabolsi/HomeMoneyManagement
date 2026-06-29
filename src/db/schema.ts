@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie'
-import type { Account, Category, Transaction, Settings, Budget, Goal, GoalContribution } from './types'
+import type { Account, Category, Transaction, Settings, Budget, Goal, GoalContribution, RecurringRule } from './types'
 
-export const SCHEMA_VERSION = 3
+export const SCHEMA_VERSION = 4
 
 export class MoneyDB extends Dexie {
   accounts!: Table<Account, string>
@@ -11,6 +11,7 @@ export class MoneyDB extends Dexie {
   budgets!: Table<Budget, string>
   goals!: Table<Goal, string>
   goalContributions!: Table<GoalContribution, string>
+  recurringRules!: Table<RecurringRule, string>
 
   constructor() {
     super('money-manager')
@@ -36,6 +37,16 @@ export class MoneyDB extends Dexie {
       budgets: 'id, categoryId, month, [month+currency]',
       goals: 'id, isArchived, sortOrder',
       goalContributions: 'id, goalId',
+    })
+    this.version(4).stores({
+      accounts: 'id, isArchived, sortOrder',
+      categories: 'id, type, parentId, isArchived',
+      transactions: 'id, accountId, categoryId, date, type, transferGroupId, deletedAt, [accountId+date]',
+      settings: 'id',
+      budgets: 'id, categoryId, month, [month+currency]',
+      goals: 'id, isArchived, sortOrder',
+      goalContributions: 'id, goalId',
+      recurringRules: 'id, isActive, nextRunDate',
     })
   }
 }

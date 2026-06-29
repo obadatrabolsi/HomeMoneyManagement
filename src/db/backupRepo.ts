@@ -41,7 +41,7 @@ export async function importBackup(json: string): Promise<void> {
   if (!data || typeof data !== 'object' || !Array.isArray(data.accounts)) {
     throw new Error('INVALID_BACKUP')
   }
-  if (![1, 2, 3].includes(data.schemaVersion)) {
+  if (![1, 2, 3, 4].includes(data.schemaVersion)) {
     throw new Error('INCOMPATIBLE_VERSION')
   }
   await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.settings, db.budgets, db.goals, db.goalContributions], async () => {

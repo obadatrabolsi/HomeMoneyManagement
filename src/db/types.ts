@@ -87,3 +87,25 @@ export interface GoalContribution {
   note?: string
   createdAt: string
 }
+
+export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
+
+export interface RecurringRule {
+  id: string
+  type: 'income' | 'expense'
+  amount: number // cents
+  accountId: string
+  categoryId?: string
+  notes?: string
+  merchant?: string
+  tags: string[]
+  frequency: RecurringFrequency
+  interval: number // >= 1
+  startDate: string // yyyy-MM-dd
+  endDate?: string // yyyy-MM-dd
+  nextRunDate: string // yyyy-MM-dd
+  lastRunDate?: string // yyyy-MM-dd
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}

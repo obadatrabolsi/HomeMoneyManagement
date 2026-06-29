@@ -5,7 +5,7 @@ beforeEach(async () => { await db.delete(); await db.open() })
 
 describe('schema v3', () => {
   it('is version 3 and exposes goals + goalContributions', () => {
-    expect(SCHEMA_VERSION).toBe(3)
+    expect(SCHEMA_VERSION).toBeGreaterThanOrEqual(3)
     expect(db.goals).toBeTruthy()
     expect(db.goalContributions).toBeTruthy()
   })
