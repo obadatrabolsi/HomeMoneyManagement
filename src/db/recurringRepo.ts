@@ -33,7 +33,7 @@ export async function createRule(input: CreateRuleInput): Promise<RecurringRule>
     merchant: input.merchant,
     tags: input.tags ?? [],
     frequency: input.frequency,
-    interval: input.interval,
+    interval: Math.max(1, Math.floor(input.interval) || 1),
     startDate: input.startDate,
     endDate: input.endDate,
     nextRunDate: input.startDate,
@@ -61,12 +61,13 @@ export async function listRules(includeInactive = false): Promise<RecurringRule[
 }
 
 export function advanceDate(date: string, frequency: RecurringFrequency, interval: number): string {
+  const n = Math.max(1, Math.floor(interval) || 1)
   const d = parseISO(date)
   const advanced =
-    frequency === 'daily' ? addDays(d, interval)
-    : frequency === 'weekly' ? addWeeks(d, interval)
-    : frequency === 'monthly' ? addMonths(d, interval)
-    : addYears(d, interval)
+    frequency === 'daily' ? addDays(d, n)
+    : frequency === 'weekly' ? addWeeks(d, n)
+    : frequency === 'monthly' ? addMonths(d, n)
+    : addYears(d, n)
   return format(advanced, 'yyyy-MM-dd')
 }
 
@@ -75,29 +76,24 @@ export async function processDueRules(today: string): Promise<number> {
   let created = 0
   for (const rule of rules) {
     if (!rule.isActive) continue
+    let count = rule.runCount ?? 0
     let next = rule.nextRunDate
     let last = rule.lastRunDate
+    let guard = 0
     while (next <= today && (!rule.endDate || next <= rule.endDate)) {
+      if (++guard > 5000) { console.warn(`recurring rule ${rule.id} hit catch-up cap`); break }
       await createTransaction({
-        type: rule.type,
-        amount: rule.amount,
-        accountId: rule.accountId,
-        categoryId: rule.categoryId,
-        date: next,
-        notes: rule.notes,
-        merchant: rule.merchant,
-        tags: rule.tags,
+        type: rule.type, amount: rule.amount, accountId: rule.accountId,
+        categoryId: rule.categoryId, date: next, notes: rule.notes,
+        merchant: rule.merchant, tags: rule.tags,
       })
       last = next
-      next = advanceDate(next, rule.frequency, rule.interval)
+      count++
+      next = advanceDate(rule.startDate, rule.frequency, rule.interval * count)
       created++
     }
     const deactivate = !!rule.endDate && next > rule.endDate
-    await updateRule(rule.id, {
-      nextRunDate: next,
-      lastRunDate: last,
-      isActive: deactivate ? false : rule.isActive,
-    })
+    await updateRule(rule.id, { nextRunDate: next, lastRunDate: last, runCount: count, isActive: deactivate ? false : rule.isActive })
   }
   return created
 }

@@ -105,6 +105,7 @@ export interface RecurringRule {
   endDate?: string // yyyy-MM-dd
   nextRunDate: string // yyyy-MM-dd
   lastRunDate?: string // yyyy-MM-dd
+  runCount?: number // occurrences generated so far (anchors nextRunDate to startDate)
   isActive: boolean
   createdAt: string
   updatedAt: string

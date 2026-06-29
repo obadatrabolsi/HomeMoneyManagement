@@ -62,4 +62,27 @@ describe('processDueRules', () => {
     await updateRule(r.id, { isActive: false })
     expect(await processDueRules('2026-06-10')).toBe(0)
   })
+
+  it('month-end anchoring: Jan 31 monthly rule generates Mar 31 not Mar 28', async () => {
+    await createRule({ type: 'expense', amount: 1000, accountId: 'a1', frequency: 'monthly', interval: 1, startDate: '2026-01-31' })
+    const created = await processDueRules('2026-04-30')
+    expect(created).toBe(4) // Jan 31, Feb 28, Mar 31, Apr 30
+    const txs = await db.transactions.toArray()
+    const dates = txs.map(t => t.date).sort()
+    expect(dates).toContain('2026-01-31')
+    expect(dates).toContain('2026-02-28')
+    expect(dates).toContain('2026-03-31')
+    expect(dates).toContain('2026-04-30')
+  })
+})
+
+describe('advanceDate and createRule interval clamp', () => {
+  it('advanceDate with interval 0 returns next day (clamped to 1)', () => {
+    expect(advanceDate('2026-06-01', 'daily', 0)).toBe('2026-06-02')
+  })
+
+  it('createRule persists clamped interval when input.interval is 0', async () => {
+    const r = await createRule({ type: 'expense', amount: 1000, accountId: 'a1', frequency: 'monthly', interval: 0, startDate: '2026-06-01' })
+    expect(r.interval).toBe(1)
+  })
 })
