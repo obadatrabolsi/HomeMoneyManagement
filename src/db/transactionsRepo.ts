@@ -160,3 +160,34 @@ export async function recentTransactions(limit: number): Promise<Transaction[]> 
   const rows = (await db.transactions.toArray()).filter(t => !t.deletedAt)
   return sortTxs(rows, 'date_desc').slice(0, limit)
 }
+
+export async function dayTotals(date: string): Promise<{ income: number; expense: number }> {
+  return rangeTotals(date, date)
+}
+
+export async function rangeTotals(from: string, to: string): Promise<{ income: number; expense: number }> {
+  const rows = (await db.transactions.toArray()).filter(
+    t => !t.deletedAt && t.date >= from && t.date <= to,
+  )
+  return {
+    income: rows.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0),
+    expense: rows.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0),
+  }
+}
+
+export async function categoryBreakdown(
+  from: string,
+  to: string,
+): Promise<Array<{ categoryId: string | null; total: number }>> {
+  const rows = (await db.transactions.toArray()).filter(
+    t => !t.deletedAt && t.type === 'expense' && t.date >= from && t.date <= to,
+  )
+  const map = new Map<string | null, number>()
+  for (const t of rows) {
+    const key = t.categoryId ?? null
+    map.set(key, (map.get(key) ?? 0) + t.amount)
+  }
+  return [...map.entries()]
+    .map(([categoryId, total]) => ({ categoryId, total }))
+    .sort((a, b) => b.total - a.total)
+}
