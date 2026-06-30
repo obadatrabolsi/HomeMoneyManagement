@@ -102,6 +102,11 @@ export const strings = {
   dataPort: 'تصدير/استيراد البيانات',
   imported: 'تم الاستيراد',
   skipped: 'تم التجاهل',
+  encryptedBackup: 'نسخة احتياطية مشفّرة',
+  exportEncrypted: 'تصدير مشفّر',
+  importEncrypted: 'استيراد مشفّر',
+  enterPassword: 'أدخل كلمة المرور',
+  wrongPassword: 'كلمة المرور غير صحيحة أو الملف تالف',
 } as const
 
 export function t(key: keyof typeof strings): string {
