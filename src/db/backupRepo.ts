@@ -32,7 +32,9 @@ export async function exportBackup(): Promise<string> {
   const payload: BackupShape = {
     schemaVersion: SCHEMA_VERSION,
     exportedAt: new Date().toISOString(),
-    accounts, categories, transactions, settings: settings ?? null, budgets, goals, goalContributions, recurringRules, debts, debtPayments,
+    accounts, categories, transactions,
+    settings: settings ? { ...settings, pinSalt: undefined, pinHash: undefined } : null,
+    budgets, goals, goalContributions, recurringRules, debts, debtPayments,
   }
   return JSON.stringify(payload, null, 2)
 }
@@ -56,6 +58,9 @@ export async function importBackup(json: string): Promise<void> {
       throw new Error('INVALID_BACKUP')
     }
   }
+  const current = await db.settings.get('singleton')
+  const devicePinSalt = current?.pinSalt
+  const devicePinHash = current?.pinHash
   await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.settings, db.budgets, db.goals, db.goalContributions, db.recurringRules, db.debts, db.debtPayments], async () => {
     await Promise.all([
       db.accounts.clear(), db.categories.clear(), db.transactions.clear(), db.settings.clear(), db.budgets.clear(),
@@ -71,6 +76,6 @@ export async function importBackup(json: string): Promise<void> {
     await db.recurringRules.bulkAdd(data.recurringRules ?? [])
     await db.debts.bulkAdd(data.debts ?? [])
     await db.debtPayments.bulkAdd(data.debtPayments ?? [])
-    if (data.settings) await db.settings.put(data.settings)
+    if (data.settings) await db.settings.put({ ...data.settings, pinSalt: devicePinSalt ?? '', pinHash: devicePinHash ?? '' })
   })
 }

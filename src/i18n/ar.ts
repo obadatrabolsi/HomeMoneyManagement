@@ -116,6 +116,7 @@ export const strings = {
   enterPin: 'أدخل الرمز',
   wrongPin: 'رمز غير صحيح',
   pinMismatch: 'الرمزان غير متطابقين',
+  pinTooShort: 'الرمز يجب أن يكون 4 خانات على الأقل',
 } as const
 
 export function t(key: keyof typeof strings): string {

@@ -17,7 +17,7 @@ export function PinSettings() {
   const doSet = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (pin.length < 4) { setError(t('wrongPin')); return }
+    if (pin.length < 4) { setError(t('pinTooShort')); return }
     if (pin !== confirm) { setError(t('pinMismatch')); return }
     await setPin(pin); setPinVal(''); setConfirm('')
   }
