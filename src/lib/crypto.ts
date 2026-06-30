@@ -25,6 +25,18 @@ async function deriveKey(password: string, salt: Uint8Array, iter: number, hash:
   )
 }
 
+export async function hashSecret(secret: string, saltB64?: string): Promise<{ salt: string; hash: string }> {
+  const salt = saltB64 ? fromB64(saltB64) : crypto.getRandomValues(new Uint8Array(16))
+  const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), 'PBKDF2', false, ['deriveBits'])
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: ITER, hash: 'SHA-256' }, baseKey, 256)
+  return { salt: toB64(salt), hash: toB64(new Uint8Array(bits)) }
+}
+
+export async function verifySecret(secret: string, saltB64: string, hashB64: string): Promise<boolean> {
+  const { hash } = await hashSecret(secret, saltB64)
+  return hash === hashB64
+}
+
 export async function encryptString(plaintext: string, password: string): Promise<string> {
   const salt = crypto.getRandomValues(new Uint8Array(16))
   const iv = crypto.getRandomValues(new Uint8Array(12))

@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route } from 'react-router-dom'
+import { LockGate } from './features/lock/LockGate'
 import { AppShell } from './routes/AppShell'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { AccountsPage } from './features/accounts/AccountsPage'
@@ -14,6 +15,7 @@ import { ReportsPage } from './features/reports/ReportsPage'
 
 export default function App() {
   return (
+    <LockGate>
     <HashRouter>
       <Routes>
         <Route element={<AppShell />}>
@@ -31,5 +33,6 @@ export default function App() {
         </Route>
       </Routes>
     </HashRouter>
+    </LockGate>
   )
 }

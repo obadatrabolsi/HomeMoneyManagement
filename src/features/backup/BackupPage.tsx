@@ -11,6 +11,7 @@ import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Card } from '../../components/ui/Card'
 import { SegmentedControl } from '../../components/ui/SegmentedControl'
+import { PinSettings } from '../lock/PinSettings'
 import { t } from '../../i18n/ar'
 import type { Settings } from '../../db/types'
 
@@ -170,6 +171,7 @@ export function BackupPage() {
           </label>
         </div>
       </Card>
+      <PinSettings />
       <p className="pt-2 text-center text-xs text-muted">
         {t('version')} {__APP_VERSION__}
       </p>

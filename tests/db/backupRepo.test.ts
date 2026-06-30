@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { db } from '../../src/db/schema'
+import { db, SCHEMA_VERSION } from '../../src/db/schema'
 import { exportBackup, importBackup } from '../../src/db/backupRepo'
 
 beforeEach(async () => { await db.delete(); await db.open() })
@@ -27,5 +27,27 @@ describe('backupRepo', () => {
   it('rejects backup where optional table field is not an array', async () => {
     const bad = JSON.stringify({ schemaVersion: 5, accounts: [], transactions: 'oops' })
     await expect(importBackup(bad)).rejects.toThrow('INVALID_BACKUP')
+  })
+  it('export excludes the PIN hash', async () => {
+    await db.settings.put({ id: 'singleton', pinSalt: 's', pinHash: 'h', theme: 'system', defaultCurrency: 'USD', schemaVersion: SCHEMA_VERSION })
+    const json = await exportBackup()
+    const parsed = JSON.parse(json)
+    expect(parsed.settings.pinSalt).toBeUndefined()
+    expect(parsed.settings.pinHash).toBeUndefined()
+  })
+  it('import preserves the device PIN', async () => {
+    await db.settings.put({ id: 'singleton', pinSalt: 'dev', pinHash: 'dev', theme: 'system', defaultCurrency: 'USD', schemaVersion: SCHEMA_VERSION })
+    const backupJson = JSON.stringify({
+      schemaVersion: SCHEMA_VERSION,
+      exportedAt: new Date().toISOString(),
+      accounts: [],
+      categories: [],
+      transactions: [],
+      settings: { id: 'singleton', pinSalt: 'other', pinHash: 'other', theme: 'system', defaultCurrency: 'USD', schemaVersion: SCHEMA_VERSION },
+    })
+    await importBackup(backupJson)
+    const after = await db.settings.get('singleton')
+    expect(after?.pinSalt).toBe('dev')
+    expect(after?.pinHash).toBe('dev')
   })
 })

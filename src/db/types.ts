@@ -52,6 +52,8 @@ export interface Settings {
   defaultCurrency: string
   theme: 'light' | 'dark' | 'system'
   schemaVersion: number
+  pinSalt?: string
+  pinHash?: string
 }
 
 export interface Budget {
