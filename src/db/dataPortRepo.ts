@@ -57,8 +57,8 @@ export async function importTransactionsCsv(text: string): Promise<ImportResult>
   const categories = await db.categories.toArray()
   const accByName: Record<string, string> = {}
   for (const a of accounts) accByName[a.name] = a.id
-  const catByName: Record<string, string> = {}
-  for (const c of categories) catByName[c.name] = c.id
+  const catByType: Record<string, string> = {}
+  for (const c of categories) catByType[`${c.type} ${c.name}`] = c.id
 
   for (let r = 1; r < rows.length; r++) {
     const row = rows[r]
@@ -71,7 +71,7 @@ export async function importTransactionsCsv(text: string): Promise<ImportResult>
     let cents: number
     try { cents = parseAmount(row[ai] ?? '') } catch { result.skipped++; result.errors.push(`سطر ${r + 1}: مبلغ غير صالح`); continue }
     if (!(cents > 0)) { result.skipped++; result.errors.push(`سطر ${r + 1}: مبلغ غير صالح`); continue }
-    const categoryId = cat >= 0 ? catByName[(row[cat] ?? '').trim()] : undefined
+    const categoryId = cat >= 0 ? catByType[`${type} ${(row[cat] ?? '').trim()}`] : undefined
     const tags = tag >= 0 && row[tag] ? row[tag].split('|').filter(Boolean) : []
     await createTransaction({
       type,
@@ -79,8 +79,8 @@ export async function importTransactionsCsv(text: string): Promise<ImportResult>
       accountId,
       categoryId,
       date: (row[di] ?? '').trim(),
-      merchant: mer >= 0 ? (row[mer] || undefined) : undefined,
-      notes: note >= 0 ? (row[note] || undefined) : undefined,
+      merchant: mer >= 0 ? ((row[mer] ?? '').trim() || undefined) : undefined,
+      notes: note >= 0 ? ((row[note] ?? '').trim() || undefined) : undefined,
       tags,
     })
     result.imported++

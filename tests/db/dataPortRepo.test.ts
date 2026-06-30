@@ -49,6 +49,17 @@ describe('dataPortRepo import', () => {
     expect(res.skipped).toBe(2)
     expect(res.errors.length).toBe(2)
   })
+  it('resolves category by type+name, not name alone', async () => {
+    const expCatId = (await createCategory({ name: 'راتب', type: 'expense', icon: 'x', color: '#e00' })).id
+    const incCatId = (await createCategory({ name: 'راتب', type: 'income', icon: 'y', color: '#0e0' })).id
+    const csv = '﻿' + CSV_HEADER.join(',') + '\r\n' +
+      ['2026-06-10', 'income', '200', 'EUR', 'نقد', 'راتب', '', '', ''].join(',')
+    const res = await importTransactionsCsv(csv)
+    expect(res.imported).toBe(1)
+    const txs = await db.transactions.toArray()
+    expect(txs[0].categoryId).toBe(incCatId)
+    expect(txs[0].categoryId).not.toBe(expCatId)
+  })
   it('round-trips export then import', async () => {
     await createTransaction({ type: 'expense', amount: 1250, accountId: accId, categoryId: catId, date: '2026-06-01', merchant: 'مقهى' })
     const csv = await transactionsToCsv()

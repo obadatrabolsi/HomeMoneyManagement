@@ -62,7 +62,9 @@ export function BackupPage() {
     const text = await file.text()
     try {
       const res = await importTransactionsCsv(text)
-      window.alert(`${t('imported')}: ${res.imported} · ${t('skipped')}: ${res.skipped}`)
+      const summary = `${t('imported')}: ${res.imported} · ${t('skipped')}: ${res.skipped}`
+      const detail = res.errors.length ? '\n' + res.errors.slice(0, 8).join('\n') + (res.errors.length > 8 ? '\n…' : '') : ''
+      window.alert(summary + detail)
     } catch {
       window.alert('ملف غير صالح')
     } finally {
