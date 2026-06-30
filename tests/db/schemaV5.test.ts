@@ -5,7 +5,7 @@ beforeEach(async () => { await db.delete(); await db.open() })
 
 describe('schema v5', () => {
   it('is version 5 and exposes debts + debtPayments', () => {
-    expect(SCHEMA_VERSION).toBe(5)
+    expect(SCHEMA_VERSION).toBeGreaterThanOrEqual(5)
     expect(db.debts).toBeTruthy()
     expect(db.debtPayments).toBeTruthy()
   })

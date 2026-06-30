@@ -49,7 +49,7 @@ export async function importBackup(json: string): Promise<void> {
   if (!data || typeof data !== 'object' || !Array.isArray(data.accounts)) {
     throw new Error('INVALID_BACKUP')
   }
-  if (![1, 2, 3, 4, 5].includes(data.schemaVersion)) {
+  if (![1, 2, 3, 4, 5, 6].includes(data.schemaVersion)) {
     throw new Error('INCOMPATIBLE_VERSION')
   }
   const arrayFields = ['categories', 'transactions', 'budgets', 'goals', 'goalContributions', 'recurringRules', 'debts', 'debtPayments'] as const

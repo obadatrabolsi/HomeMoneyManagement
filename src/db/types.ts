@@ -136,3 +136,13 @@ export interface DebtPayment {
   note?: string
   createdAt: string
 }
+
+export interface Attachment {
+  id: string
+  transactionId: string
+  blob: Blob
+  thumb?: Blob
+  mime: string
+  size: number
+  createdAt: string
+}
