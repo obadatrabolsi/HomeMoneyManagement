@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { exportBackup, importBackup } from '../../db/backupRepo'
+import { transactionsToCsv, importTransactionsCsv } from '../../db/dataPortRepo'
 import { updateSettings } from '../../db/settingsRepo'
 import { db } from '../../db/schema'
 import { applyTheme } from '../../lib/theme'
@@ -14,6 +15,7 @@ import type { Settings } from '../../db/types'
 
 export function BackupPage() {
   const fileRef = useRef<HTMLInputElement>(null)
+  const csvFileRef = useRef<HTMLInputElement>(null)
   const data = useLiveQuery(() => db.settings.get('singleton'), [], undefined)
   const theme = data?.theme ?? 'system'
 
@@ -40,6 +42,33 @@ export function BackupPage() {
       window.alert('ملف غير صالح')
     } finally {
       if (fileRef.current) fileRef.current.value = ''
+    }
+  }
+
+  const doExportCsv = async () => {
+    const csv = await transactionsToCsv()
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const doImportCsv = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const text = await file.text()
+    try {
+      const res = await importTransactionsCsv(text)
+      const summary = `${t('imported')}: ${res.imported} · ${t('skipped')}: ${res.skipped}`
+      const detail = res.errors.length ? '\n' + res.errors.slice(0, 8).join('\n') + (res.errors.length > 8 ? '\n…' : '') : ''
+      window.alert(summary + detail)
+    } catch {
+      window.alert('ملف غير صالح')
+    } finally {
+      if (csvFileRef.current) csvFileRef.current.value = ''
     }
   }
 
@@ -83,6 +112,18 @@ export function BackupPage() {
           <input ref={fileRef} type="file" accept="application/json" className="hidden" onChange={doImport} />
         </label>
       </div>
+      <Card title={t('dataPort')}>
+        <div className="flex flex-col gap-2">
+          <Button onClick={doExportCsv}>{t('exportCsv')}</Button>
+          <label className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-brand/10 px-5 py-2.5 font-semibold text-brand transition hover:bg-brand/15 active:scale-95">
+            {t('importCsv')}
+            <input ref={csvFileRef} type="file" accept=".csv,text/csv" className="hidden" onChange={doImportCsv} />
+          </label>
+        </div>
+      </Card>
+      <p className="pt-2 text-center text-xs text-muted">
+        {t('version')} {__APP_VERSION__}
+      </p>
     </div>
   )
 }

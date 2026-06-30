@@ -95,6 +95,13 @@ export const strings = {
   themeLight: 'فاتح',
   themeDark: 'داكن',
   themeSystem: 'حسب النظام',
+  version: 'الإصدار',
+  exportCsv: 'تصدير CSV',
+  importCsv: 'استيراد CSV',
+  savePdf: 'حفظ PDF',
+  dataPort: 'تصدير/استيراد البيانات',
+  imported: 'تم الاستيراد',
+  skipped: 'تم التجاهل',
 } as const
 
 export function t(key: keyof typeof strings): string {
