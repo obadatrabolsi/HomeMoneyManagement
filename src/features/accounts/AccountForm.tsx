@@ -6,10 +6,11 @@ import { Button } from '../../components/ui/Button'
 import { t } from '../../i18n/ar'
 import { parseAmount } from '../../lib/money'
 import { createAccount } from '../../db/accountsRepo'
+import { CURRENCIES, CURRENCY_CODES } from '../../lib/currencies'
 
 const schema = z.object({
   name: z.string().min(1),
-  currency: z.string().min(3).max(3),
+  currency: z.enum(CURRENCY_CODES as [string, ...string[]]),
   color: z.string().min(1),
   initialBalance: z.string(),
 })
@@ -18,11 +19,11 @@ type FormValues = z.infer<typeof schema>
 export function AccountForm({ onDone }: { onDone: () => void }) {
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { currency: 'EUR', color: '#10b981', initialBalance: '0' },
+    defaultValues: { currency: 'SYP', color: '#10b981', initialBalance: '0' },
   })
   const onSubmit = async (v: FormValues) => {
     await createAccount({
-      name: v.name, icon: 'wallet', color: v.color, currency: v.currency.toUpperCase(),
+      name: v.name, icon: '🏦', color: v.color, currency: v.currency,
       initialBalance: parseAmount(v.initialBalance || '0'),
     })
     onDone()
@@ -33,12 +34,16 @@ export function AccountForm({ onDone }: { onDone: () => void }) {
         <input className="input" {...register('name')} />
       </Field>
       <Field label={t('currency')} error={errors.currency && 'مطلوب'}>
-        <input className="input" {...register('currency')} />
+        <select className="input" {...register('currency')}>
+          {CURRENCIES.map((c) => (
+            <option key={c.code} value={c.code}>{c.label} ({c.code})</option>
+          ))}
+        </select>
       </Field>
       <Field label={t('initialBalance')}>
         <input className="input" inputMode="decimal" {...register('initialBalance')} />
       </Field>
-      <Button type="submit">{t('save')}</Button>
+      <Button type="submit" variant="primary" className="w-full">{t('save')}</Button>
     </form>
   )
 }

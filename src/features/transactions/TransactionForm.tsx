@@ -8,6 +8,7 @@ import { isoDate } from '../../lib/date'
 import { Field } from '../../components/ui/Field'
 import { Button } from '../../components/ui/Button'
 import { SegmentedControl } from '../../components/ui/SegmentedControl'
+import { SearchableSelect } from '../../components/ui/SearchableSelect'
 import { t } from '../../i18n/ar'
 import type { TransactionType } from '../../db/types'
 
@@ -17,6 +18,7 @@ export function TransactionForm({ onDone }: { onDone: () => void }) {
   const [accountId, setAccountId] = useState('')
   const [toAccountId, setToAccountId] = useState('')
   const [categoryId, setCategoryId] = useState('')
+  const [notes, setNotes] = useState('')
   const [error, setError] = useState('')
 
   const accounts = useLiveQuery(() => listAccounts(), [], [])
@@ -35,7 +37,12 @@ export function TransactionForm({ onDone }: { onDone: () => void }) {
       if (type === 'transfer') {
         await createTransfer({ fromAccountId: accountId, toAccountId, amount: cents, date })
       } else {
-        await createTransaction({ type, amount: cents, accountId, categoryId: categoryId || undefined, date })
+        await createTransaction({
+          type, amount: cents, accountId,
+          categoryId: categoryId || undefined,
+          notes: notes.trim() || undefined,
+          date,
+        })
       }
       onDone()
     } catch (err) {
@@ -73,12 +80,23 @@ export function TransactionForm({ onDone }: { onDone: () => void }) {
           </select>
         </Field>
       ) : (
-        <Field label={t('category')}>
-          <select className="input" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-            <option value="">—</option>
-            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-        </Field>
+        <>
+          <Field label={t('category')}>
+            <SearchableSelect
+              options={categories.map((c) => ({ value: c.id, label: c.name, icon: c.icon }))}
+              value={categoryId}
+              onChange={setCategoryId}
+            />
+          </Field>
+          <Field label={t('description')}>
+            <textarea
+              className="input min-h-[44px] resize-y"
+              rows={2}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </Field>
+        </>
       )}
       {error && <p className="text-sm font-medium text-expense">{error}</p>}
       <Button type="submit" variant="primary" className="w-full">{t('save')}</Button>

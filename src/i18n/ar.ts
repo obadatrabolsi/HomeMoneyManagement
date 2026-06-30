@@ -22,6 +22,7 @@ export const strings = {
   category: 'التصنيف',
   date: 'التاريخ',
   notes: 'الملاحظات',
+  description: 'الوصف',
   tags: 'الوسوم',
   merchant: 'الجهة',
   name: 'الاسم',

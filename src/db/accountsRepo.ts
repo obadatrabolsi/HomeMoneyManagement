@@ -30,6 +30,20 @@ export async function createAccount(
   return acc
 }
 
+// Older builds stored the account icon as a text token (e.g. "wallet"); the UI
+// now renders the icon glyph directly, so migrate any legacy token to an emoji.
+const LEGACY_ICON_MAP: Record<string, string> = {
+  wallet: '🏦', cash: '💵', card: '💳', bank: '🏦', coins: '🪙', piggy: '🐷',
+}
+
+export async function migrateLegacyAccountIcons(): Promise<void> {
+  const accounts = await db.accounts.toArray()
+  for (const a of accounts) {
+    const mapped = LEGACY_ICON_MAP[a.icon]
+    if (mapped) await db.accounts.update(a.id, { icon: mapped })
+  }
+}
+
 export async function updateAccount(accId: string, patch: Partial<Account>): Promise<void> {
   await db.accounts.update(accId, { ...patch, updatedAt: nowIso() })
 }
