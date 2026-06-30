@@ -18,5 +18,5 @@ export async function verifyPin(pin: string): Promise<boolean> {
 }
 
 export async function clearPin(): Promise<void> {
-  await updateSettings({ pinSalt: undefined, pinHash: undefined })
+  await updateSettings({ pinSalt: '', pinHash: '' })
 }

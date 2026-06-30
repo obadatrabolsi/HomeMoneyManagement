@@ -107,6 +107,15 @@ export const strings = {
   importEncrypted: 'استيراد مشفّر',
   enterPassword: 'أدخل كلمة المرور',
   wrongPassword: 'كلمة المرور غير صحيحة أو الملف تالف',
+  appLock: 'قفل التطبيق',
+  pin: 'رمز PIN',
+  setPin: 'تعيين رمز',
+  removePin: 'إزالة الرمز',
+  confirmPin: 'تأكيد الرمز',
+  unlock: 'فتح',
+  enterPin: 'أدخل الرمز',
+  wrongPin: 'رمز غير صحيح',
+  pinMismatch: 'الرمزان غير متطابقين',
 } as const
 
 export function t(key: keyof typeof strings): string {
