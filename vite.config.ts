@@ -2,7 +2,13 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig({
+// GitHub Pages serves a project site from a subpath (/<repo>/). The build base
+// must match the repo name; dev keeps '/'. If your repo has a different name —
+// or you use a user/org site or a custom domain — change REPO_BASE (use '/').
+const REPO_BASE = '/HomeMoneyManagement/'
+
+export default defineConfig(({ command }) => ({
+  base: command === 'build' ? REPO_BASE : '/',
   // vite-plugin-pwa ships vite-5 types; vitest@4 bundles vite-6 — cast resolves the mismatch
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   plugins: [react(), VitePWA({
@@ -14,8 +20,9 @@ export default defineConfig({
       description: 'تطبيق لإدارة الأموال المنزلية — حسابات، عمليات، ميزانيات وأهداف.',
       lang: 'ar',
       dir: 'rtl',
-      start_url: '/',
-      scope: '/',
+      // Relative so the manifest works under any base (root or /<repo>/).
+      start_url: '.',
+      scope: '.',
       display: 'standalone',
       orientation: 'portrait',
       background_color: '#6D28D9',
@@ -33,4 +40,4 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
   },
-})
+}))

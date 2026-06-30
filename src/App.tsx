@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { AppShell } from './routes/AppShell'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { AccountsPage } from './features/accounts/AccountsPage'
@@ -14,7 +14,7 @@ import { ReportsPage } from './features/reports/ReportsPage'
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route element={<AppShell />}>
           <Route path="/" element={<DashboardPage />} />
@@ -30,6 +30,6 @@ export default function App() {
           <Route path="/reports" element={<ReportsPage />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
