@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect, beforeEach } from 'vitest'
 import { db, SCHEMA_VERSION } from '../../src/db/schema'
 import { exportBackup, importBackup } from '../../src/db/backupRepo'
@@ -34,6 +35,20 @@ describe('backupRepo', () => {
     const parsed = JSON.parse(json)
     expect(parsed.settings.pinSalt).toBeUndefined()
     expect(parsed.settings.pinHash).toBeUndefined()
+  })
+  it('import clears existing attachments', async () => {
+    await db.attachments.add({ id: 'x', transactionId: 't', blob: new Blob(['x']), mime: 'image/jpeg', size: 1, createdAt: 't' })
+    expect(await db.attachments.count()).toBe(1)
+    const backupJson = JSON.stringify({
+      schemaVersion: SCHEMA_VERSION,
+      exportedAt: new Date().toISOString(),
+      accounts: [],
+      categories: [],
+      transactions: [],
+      settings: null,
+    })
+    await importBackup(backupJson)
+    expect(await db.attachments.count()).toBe(0)
   })
   it('import preserves the device PIN', async () => {
     await db.settings.put({ id: 'singleton', pinSalt: 'dev', pinHash: 'dev', theme: 'system', defaultCurrency: 'USD', schemaVersion: SCHEMA_VERSION })

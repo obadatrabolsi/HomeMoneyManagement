@@ -8,17 +8,23 @@ import type { Attachment } from '../../db/types'
 export function Attachments({ transactionId }: { transactionId: string }) {
   const items = useLiveQuery(() => listAttachments(transactionId), [transactionId], [])
   const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
 
   const onFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
     e.target.value = ''
     if (!files.length) return
     setBusy(true)
+    setError('')
     try {
       for (const f of files) {
-        const blob = await compressImage(f)
-        const thumb = await makeThumb(f)
-        await addAttachment({ transactionId, blob, thumb, mime: 'image/jpeg' })
+        try {
+          const blob = await compressImage(f)
+          const thumb = await makeThumb(f)
+          await addAttachment({ transactionId, blob, thumb, mime: 'image/jpeg' })
+        } catch {
+          setError(t('imageError'))
+        }
       }
     } finally {
       setBusy(false)
@@ -32,8 +38,9 @@ export function Attachments({ transactionId }: { transactionId: string }) {
       </div>
       <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-surface-2 px-4 py-2 text-sm font-medium text-ink">
         {busy ? '…' : t('addImage')}
-        <input type="file" accept="image/*" multiple capture="environment" className="hidden" onChange={onFiles} disabled={busy} />
+        <input type="file" accept="image/*" multiple className="hidden" onChange={onFiles} disabled={busy} />
       </label>
+      {error && <p className="text-sm text-expense">{error}</p>}
     </div>
   )
 }

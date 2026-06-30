@@ -120,6 +120,7 @@ export const strings = {
   attachments: 'المرفقات',
   addImage: 'إضافة صورة',
   deleteImage: 'حذف الصورة',
+  imageError: 'تعذّرت إضافة الصورة',
 } as const
 
 export function t(key: keyof typeof strings): string {

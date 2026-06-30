@@ -61,11 +61,11 @@ export async function importBackup(json: string): Promise<void> {
   const current = await db.settings.get('singleton')
   const devicePinSalt = current?.pinSalt
   const devicePinHash = current?.pinHash
-  await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.settings, db.budgets, db.goals, db.goalContributions, db.recurringRules, db.debts, db.debtPayments], async () => {
+  await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.settings, db.budgets, db.goals, db.goalContributions, db.recurringRules, db.debts, db.debtPayments, db.attachments], async () => {
     await Promise.all([
       db.accounts.clear(), db.categories.clear(), db.transactions.clear(), db.settings.clear(), db.budgets.clear(),
       db.goals.clear(), db.goalContributions.clear(), db.recurringRules.clear(),
-      db.debts.clear(), db.debtPayments.clear(),
+      db.debts.clear(), db.debtPayments.clear(), db.attachments.clear(),
     ])
     await db.accounts.bulkAdd(data.accounts)
     await db.categories.bulkAdd(data.categories ?? [])
