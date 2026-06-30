@@ -13,11 +13,11 @@ function fromB64(b64: string): Uint8Array {
   return bytes
 }
 
-async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
+async function deriveKey(password: string, salt: Uint8Array, iter: number, hash: string): Promise<CryptoKey> {
   const enc = new TextEncoder()
   const baseKey = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey'])
   return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt, iterations: ITER, hash: 'SHA-256' },
+    { name: 'PBKDF2', salt, iterations: iter, hash },
     baseKey,
     { name: 'AES-GCM', length: 256 },
     false,
@@ -28,7 +28,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
 export async function encryptString(plaintext: string, password: string): Promise<string> {
   const salt = crypto.getRandomValues(new Uint8Array(16))
   const iv = crypto.getRandomValues(new Uint8Array(12))
-  const key = await deriveKey(password, salt)
+  const key = await deriveKey(password, salt, ITER, 'SHA-256')
   const ct = new Uint8Array(
     await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(plaintext)),
   )
@@ -39,7 +39,7 @@ export async function encryptString(plaintext: string, password: string): Promis
 }
 
 export async function decryptString(envelope: string, password: string): Promise<string> {
-  let data: { salt?: string; iv?: string; ct?: string; iter?: number }
+  let data: { salt?: string; iv?: string; ct?: string; iter?: number; hash?: string }
   try {
     data = JSON.parse(envelope)
   } catch {
@@ -47,7 +47,7 @@ export async function decryptString(envelope: string, password: string): Promise
   }
   if (!data || !data.salt || !data.iv || !data.ct) throw new Error('INVALID_ENVELOPE')
   try {
-    const key = await deriveKey(password, fromB64(data.salt))
+    const key = await deriveKey(password, fromB64(data.salt), data.iter ?? ITER, data.hash ?? 'SHA-256')
     const plain = await crypto.subtle.decrypt(
       { name: 'AES-GCM', iv: fromB64(data.iv) },
       key,

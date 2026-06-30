@@ -94,12 +94,19 @@ export function BackupPage() {
     const text = await file.text()
     const pw = window.prompt(t('enterPassword'))
     if (!pw) return
+    let json: string
     try {
-      const json = await decryptString(text, pw)
+      json = await decryptString(text, pw)
+    } catch {
+      window.alert(t('wrongPassword'))
+      if (encFileRef.current) encFileRef.current.value = ''
+      return
+    }
+    try {
       await importBackup(json)
       window.alert('تم الاستيراد')
     } catch {
-      window.alert(t('wrongPassword'))
+      window.alert('ملف غير صالح')
     } finally {
       if (encFileRef.current) encFileRef.current.value = ''
     }

@@ -30,4 +30,11 @@ describe('crypto', () => {
     const b = await encryptString('same', 'pw')
     expect(a).not.toBe(b)
   })
+  it('rejects when envelope iter is tampered (envelope is self-describing)', async () => {
+    const env = await encryptString('sensitive data', 'mypassword')
+    const parsed = JSON.parse(env)
+    parsed.iter = parsed.iter + 1
+    const tampered = JSON.stringify(parsed)
+    await expect(decryptString(tampered, 'mypassword')).rejects.toThrow('DECRYPT_FAILED')
+  })
 })
