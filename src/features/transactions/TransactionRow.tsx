@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { softDeleteTransaction, toggleFavorite } from '../../db/transactionsRepo'
+import { getCategory } from '../../db/categoriesRepo'
 import { formatMoney } from '../../lib/money'
 import type { Transaction } from '../../db/types'
 import { IconBadge } from '../../components/ui/IconBadge'
@@ -21,13 +23,19 @@ const badge: Record<Transaction['type'], { icon: string; color: string }> = {
 
 export function TransactionRow({ tx, currency, onDeleted }: { tx: Transaction; currency: string; onDeleted?: (ids: string[]) => void }) {
   const [editOpen, setEditOpen] = useState(false)
+  const category = useLiveQuery(
+    () => (tx.categoryId ? getCategory(tx.categoryId) : undefined),
+    [tx.categoryId],
+  )
   const sign = tx.type === 'expense' || (tx.type === 'transfer' && tx.transferDirection === 'out') ? '-' : '+'
   const b = badge[tx.type]
+  const title = category?.name || tx.merchant || t(tx.type)
   return (
     <div className="flex items-center gap-3 rounded-2xl bg-surface p-3 shadow-soft">
-      <IconBadge icon={b.icon} color={b.color} />
+      {category ? <IconBadge icon={category.icon} color={category.color} /> : <IconBadge icon={b.icon} color={b.color} />}
       <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-ink">{tx.merchant || tx.notes || t(tx.type)}</p>
+        <p className="truncate font-semibold text-ink">{title}</p>
+        {tx.notes && <p className="truncate text-xs text-muted">{tx.notes}</p>}
         <p className="text-xs text-muted">{tx.date}</p>
       </div>
       <div className="flex items-center gap-2">

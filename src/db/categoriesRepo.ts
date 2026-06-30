@@ -8,6 +8,10 @@ export async function listCategories(type?: CategoryType): Promise<Category[]> {
   return rows.sort((a, b) => a.sortOrder - b.sortOrder)
 }
 
+export async function getCategory(catId: string): Promise<Category | undefined> {
+  return db.categories.get(catId)
+}
+
 export async function createCategory(
   input: Omit<Category, 'id' | 'sortOrder' | 'isArchived'> & Partial<Pick<Category, 'sortOrder'>>,
 ): Promise<Category> {
