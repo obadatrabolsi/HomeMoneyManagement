@@ -49,7 +49,7 @@ export async function importBackup(json: string): Promise<void> {
   if (!data || typeof data !== 'object' || !Array.isArray(data.accounts)) {
     throw new Error('INVALID_BACKUP')
   }
-  if (![1, 2, 3, 4, 5].includes(data.schemaVersion)) {
+  if (![1, 2, 3, 4, 5, 6].includes(data.schemaVersion)) {
     throw new Error('INCOMPATIBLE_VERSION')
   }
   const arrayFields = ['categories', 'transactions', 'budgets', 'goals', 'goalContributions', 'recurringRules', 'debts', 'debtPayments'] as const
@@ -61,11 +61,11 @@ export async function importBackup(json: string): Promise<void> {
   const current = await db.settings.get('singleton')
   const devicePinSalt = current?.pinSalt
   const devicePinHash = current?.pinHash
-  await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.settings, db.budgets, db.goals, db.goalContributions, db.recurringRules, db.debts, db.debtPayments], async () => {
+  await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.settings, db.budgets, db.goals, db.goalContributions, db.recurringRules, db.debts, db.debtPayments, db.attachments], async () => {
     await Promise.all([
       db.accounts.clear(), db.categories.clear(), db.transactions.clear(), db.settings.clear(), db.budgets.clear(),
       db.goals.clear(), db.goalContributions.clear(), db.recurringRules.clear(),
-      db.debts.clear(), db.debtPayments.clear(),
+      db.debts.clear(), db.debtPayments.clear(), db.attachments.clear(),
     ])
     await db.accounts.bulkAdd(data.accounts)
     await db.categories.bulkAdd(data.categories ?? [])

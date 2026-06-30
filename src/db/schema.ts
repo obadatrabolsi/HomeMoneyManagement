@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie'
-import type { Account, Category, Transaction, Settings, Budget, Goal, GoalContribution, RecurringRule, Debt, DebtPayment } from './types'
+import type { Account, Category, Transaction, Settings, Budget, Goal, GoalContribution, RecurringRule, Debt, DebtPayment, Attachment } from './types'
 
-export const SCHEMA_VERSION = 5
+export const SCHEMA_VERSION = 6
 
 export class MoneyDB extends Dexie {
   accounts!: Table<Account, string>
@@ -14,6 +14,7 @@ export class MoneyDB extends Dexie {
   recurringRules!: Table<RecurringRule, string>
   debts!: Table<Debt, string>
   debtPayments!: Table<DebtPayment, string>
+  attachments!: Table<Attachment, string>
 
   constructor() {
     super('money-manager')
@@ -61,6 +62,19 @@ export class MoneyDB extends Dexie {
       recurringRules: 'id, isActive, nextRunDate',
       debts: 'id, direction, isSettled',
       debtPayments: 'id, debtId',
+    })
+    this.version(6).stores({
+      accounts: 'id, isArchived, sortOrder',
+      categories: 'id, type, parentId, isArchived',
+      transactions: 'id, accountId, categoryId, date, type, transferGroupId, deletedAt, [accountId+date]',
+      settings: 'id',
+      budgets: 'id, categoryId, month, [month+currency]',
+      goals: 'id, isArchived, sortOrder',
+      goalContributions: 'id, goalId',
+      recurringRules: 'id, isActive, nextRunDate',
+      debts: 'id, direction, isSettled',
+      debtPayments: 'id, debtId',
+      attachments: 'id, transactionId',
     })
   }
 }

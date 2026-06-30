@@ -8,6 +8,7 @@ import { Sheet } from '../../components/ui/Sheet'
 import { Field } from '../../components/ui/Field'
 import { Button } from '../../components/ui/Button'
 import { SearchableSelect } from '../../components/ui/SearchableSelect'
+import { Attachments } from './Attachments'
 import { t } from '../../i18n/ar'
 import type { Transaction } from '../../db/types'
 
@@ -102,6 +103,10 @@ function EditForm({ tx, onDone }: { tx: Transaction; onDone: () => void }) {
 
       <Field label={t('date')}>
         <input type="date" className="input" value={date} onChange={(e) => setDate(e.target.value)} />
+      </Field>
+
+      <Field label={t('attachments')}>
+        <Attachments transactionId={tx.id} />
       </Field>
 
       {error && <p className="text-sm font-medium text-expense">{error}</p>}
