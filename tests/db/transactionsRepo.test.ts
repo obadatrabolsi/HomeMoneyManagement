@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { db } from '../../src/db/schema'
 import {
   createTransaction, updateTransaction, softDeleteTransaction, undoDelete, toggleFavorite,
-  setTransactionAmount,
+  updateTransactionOrGroup,
 } from '../../src/db/transactionsRepo'
 
 beforeEach(async () => { await db.delete(); await db.open() })
@@ -43,19 +43,20 @@ describe('transactionsRepo', () => {
     const updated = await db.transactions.get(t.id)
     expect(updated).toMatchObject({ accountId: 'a2', categoryId: 'c1', notes: 'قهوة', date: '2026-06-02' })
   })
-  it('setTransactionAmount updates a single transaction', async () => {
+  it('updateTransactionOrGroup updates a single transaction', async () => {
     const t = await createTransaction({ type: 'expense', amount: 500, accountId: 'a1', date: '2026-06-01' })
-    await setTransactionAmount(t.id, 750)
+    await updateTransactionOrGroup(t.id, { amount: 750 })
     expect((await db.transactions.get(t.id))?.amount).toBe(750)
   })
-  it('setTransactionAmount updates both legs of a transfer', async () => {
+  it('updateTransactionOrGroup updates both legs of a transfer', async () => {
     const gid = 'g1'
     await db.transactions.bulkAdd([
       { id: 'o', type: 'transfer', transferDirection: 'out', amount: 1000, accountId: 'a1', counterAccountId: 'a2', transferGroupId: gid, date: '2026-06-01', tags: [], createdAt: 't', updatedAt: 't' },
       { id: 'i', type: 'transfer', transferDirection: 'in', amount: 1000, accountId: 'a2', counterAccountId: 'a1', transferGroupId: gid, date: '2026-06-01', tags: [], createdAt: 't', updatedAt: 't' },
     ])
-    await setTransactionAmount('o', 1500)
+    await updateTransactionOrGroup('o', { amount: 1500, date: '2026-06-05' })
     expect((await db.transactions.get('o'))?.amount).toBe(1500)
     expect((await db.transactions.get('i'))?.amount).toBe(1500)
+    expect((await db.transactions.get('i'))?.date).toBe('2026-06-05')
   })
 })

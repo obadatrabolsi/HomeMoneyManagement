@@ -39,17 +39,21 @@ export async function getTransaction(txId: string): Promise<Transaction | undefi
 }
 
 /**
- * Update only the amount. For a transfer, both legs share the amount, so the
- * whole transfer group is updated together.
+ * Apply an edit to a transaction. For a transfer, the given fields are applied
+ * to both legs of the group (only pass fields shared across legs — e.g. amount,
+ * date, notes — never per-leg fields like accountId/categoryId).
  */
-export async function setTransactionAmount(txId: string, amount: number): Promise<void> {
+export async function updateTransactionOrGroup(
+  txId: string,
+  patch: Partial<Transaction>,
+): Promise<void> {
   const tx = await db.transactions.get(txId)
   if (!tx) return
   const stamp = nowIso()
   if (tx.transferGroupId) {
-    await db.transactions.where('transferGroupId').equals(tx.transferGroupId).modify({ amount, updatedAt: stamp })
+    await db.transactions.where('transferGroupId').equals(tx.transferGroupId).modify({ ...patch, updatedAt: stamp })
   } else {
-    await db.transactions.update(txId, { amount, updatedAt: stamp })
+    await db.transactions.update(txId, { ...patch, updatedAt: stamp })
   }
 }
 
