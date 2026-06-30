@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import pkg from './package.json'
 
 // GitHub Pages serves a project site from a subpath (/<repo>/). The build base
 // must match the repo name; dev keeps '/'. If your repo has a different name —
@@ -9,6 +10,7 @@ const REPO_BASE = '/HomeMoneyManagement/'
 
 export default defineConfig(({ command }) => ({
   base: command === 'build' ? REPO_BASE : '/',
+  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   // vite-plugin-pwa ships vite-5 types; vitest@4 bundles vite-6 — cast resolves the mismatch
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   plugins: [react(), VitePWA({
