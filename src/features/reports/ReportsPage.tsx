@@ -12,6 +12,7 @@ import { Field } from '../../components/ui/Field'
 import { Card } from '../../components/ui/Card'
 import { StatTile } from '../../components/ui/StatTile'
 import { SegmentedControl } from '../../components/ui/SegmentedControl'
+import { Button } from '../../components/ui/Button'
 import { t } from '../../i18n/ar'
 
 type PeriodKey = 'thisMonth' | 'lastMonth' | 'thisYear'
@@ -53,7 +54,10 @@ export function ReportsPage() {
   if (!data) return null
   return (
     <div className="animate-fade-in space-y-4">
-      <h1 className="text-xl font-bold text-ink">{t('reports')}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-ink">{t('reports')}</h1>
+        <Button variant="soft" className="no-print" onClick={() => window.print()}>{t('savePdf')}</Button>
+      </div>
       <div className="flex gap-2">
         <Field label={t('currency')}>
           <select className="input" value={data.cur} onChange={(e) => setCurrency(e.target.value)}>

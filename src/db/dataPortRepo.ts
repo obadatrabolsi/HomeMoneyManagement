@@ -2,7 +2,6 @@ import { db } from './schema'
 import { toCsv, parseCsv } from '../lib/csv'
 import { createTransaction } from './transactionsRepo'
 import { fromCents, parseAmount } from '../lib/money'
-import type { Transaction } from './types'
 
 export const CSV_HEADER = ['date', 'type', 'amount', 'currency', 'account', 'category', 'merchant', 'notes', 'tags']
 
