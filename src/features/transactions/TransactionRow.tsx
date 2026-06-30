@@ -21,7 +21,7 @@ const badge: Record<Transaction['type'], { icon: string; color: string }> = {
   transfer: { icon: '⇄', color: '#0EA5E9' },
 }
 
-export function TransactionRow({ tx, currency, onDeleted }: { tx: Transaction; currency: string; onDeleted?: (ids: string[]) => void }) {
+export function TransactionRow({ tx, currency, onDeleted, hasAttachment }: { tx: Transaction; currency: string; onDeleted?: (ids: string[]) => void; hasAttachment?: boolean }) {
   const [editOpen, setEditOpen] = useState(false)
   const category = useLiveQuery(
     () => (tx.categoryId ? getCategory(tx.categoryId) : undefined),
@@ -34,7 +34,7 @@ export function TransactionRow({ tx, currency, onDeleted }: { tx: Transaction; c
     <div className="flex items-center gap-3 rounded-2xl bg-surface p-3 shadow-soft">
       {category ? <IconBadge icon={category.icon} color={category.color} /> : <IconBadge icon={b.icon} color={b.color} />}
       <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-ink">{title}</p>
+        <p className="truncate font-semibold text-ink">{title}{hasAttachment && <span className="ml-1 text-muted">📎</span>}</p>
         {tx.notes && <p className="truncate text-xs text-muted">{tx.notes}</p>}
         <p className="text-xs text-muted">{tx.date}</p>
       </div>

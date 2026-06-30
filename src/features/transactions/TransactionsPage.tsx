@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { queryTransactions, undoDelete } from '../../db/transactionsRepo'
+import { transactionIdsWithAttachments } from '../../db/attachmentsRepo'
 import { listAccounts } from '../../db/accountsRepo'
 import { useUiStore } from '../../stores/uiStore'
 import { TransactionRow } from './TransactionRow'
@@ -14,12 +15,12 @@ export function TransactionsPage() {
   const setFilter = useUiStore((s) => s.setFilter)
   const [undoIds, setUndoIds] = useState<string[] | null>(null)
   const result = useLiveQuery(async () => {
-    const [txs, accounts] = await Promise.all([queryTransactions(filter), listAccounts()])
+    const [txs, accounts, attachSet] = await Promise.all([queryTransactions(filter), listAccounts(), transactionIdsWithAttachments()])
     const accCur: Record<string, string> = {}
     for (const a of accounts) accCur[a.id] = a.currency
-    return { txs, accCur }
-  }, [JSON.stringify(filter)], { txs: [] as Transaction[], accCur: {} as Record<string, string> })
-  const { txs, accCur } = result
+    return { txs, accCur, attachSet }
+  }, [JSON.stringify(filter)], { txs: [] as Transaction[], accCur: {} as Record<string, string>, attachSet: new Set<string>() })
+  const { txs, accCur, attachSet } = result
 
   return (
     <div className="animate-fade-in space-y-4">
@@ -32,7 +33,7 @@ export function TransactionsPage() {
       />
       {txs.length === 0 && <EmptyState message={t('noData')} emoji="🧾" />}
       {txs.map((tx) => (
-        <TransactionRow key={tx.id} tx={tx} currency={accCur[tx.accountId] ?? 'EUR'} onDeleted={(ids) => setUndoIds(ids)} />
+        <TransactionRow key={tx.id} tx={tx} currency={accCur[tx.accountId] ?? 'EUR'} onDeleted={(ids) => setUndoIds(ids)} hasAttachment={attachSet.has(tx.id)} />
       ))}
       {undoIds && (
         <Toast
