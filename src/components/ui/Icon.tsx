@@ -18,6 +18,7 @@ export type IconName =
   | 'repeat'
   | 'credit-card'
   | 'chart'
+  | 'edit'
 
 const paths: Record<IconName, JSX.Element> = {
   home: <path d="M3 10.5 12 3l9 7.5M5 9.5V20a1 1 0 0 0 1 1h3.5v-5.5h5V21H18a1 1 0 0 0 1-1V9.5" />,
@@ -82,6 +83,7 @@ const paths: Record<IconName, JSX.Element> = {
       <path d="M12 3a9 9 0 0 1 9 9h-9Z" />
     </>
   ),
+  edit: <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />,
 }
 
 export function Icon({

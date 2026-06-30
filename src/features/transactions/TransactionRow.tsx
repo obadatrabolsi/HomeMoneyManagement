@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { softDeleteTransaction, toggleFavorite } from '../../db/transactionsRepo'
 import { formatMoney } from '../../lib/money'
 import type { Transaction } from '../../db/types'
 import { IconBadge } from '../../components/ui/IconBadge'
 import { Icon } from '../../components/ui/Icon'
+import { EditTransactionSheet } from './EditTransactionSheet'
 import { t } from '../../i18n/ar'
 
 const amountColor: Record<Transaction['type'], string> = {
@@ -18,6 +20,7 @@ const badge: Record<Transaction['type'], { icon: string; color: string }> = {
 }
 
 export function TransactionRow({ tx, currency, onDeleted }: { tx: Transaction; currency: string; onDeleted?: (ids: string[]) => void }) {
+  const [editOpen, setEditOpen] = useState(false)
   const sign = tx.type === 'expense' || (tx.type === 'transfer' && tx.transferDirection === 'out') ? '-' : '+'
   const b = badge[tx.type]
   return (
@@ -29,6 +32,13 @@ export function TransactionRow({ tx, currency, onDeleted }: { tx: Transaction; c
       </div>
       <div className="flex items-center gap-2">
         <span className={`font-bold tabular-nums ${amountColor[tx.type]}`}>{sign}{formatMoney(tx.amount, currency)}</span>
+        <button
+          aria-label={t('edit')}
+          onClick={() => setEditOpen(true)}
+          className="text-muted transition hover:text-brand active:scale-90"
+        >
+          <Icon name="edit" size={18} />
+        </button>
         <button
           aria-label="مفضلة"
           onClick={() => toggleFavorite(tx.id)}
@@ -47,6 +57,7 @@ export function TransactionRow({ tx, currency, onDeleted }: { tx: Transaction; c
           <Icon name="trash" size={18} />
         </button>
       </div>
+      <EditTransactionSheet tx={tx} open={editOpen} onClose={() => setEditOpen(false)} />
     </div>
   )
 }

@@ -38,6 +38,21 @@ export async function getTransaction(txId: string): Promise<Transaction | undefi
   return db.transactions.get(txId)
 }
 
+/**
+ * Update only the amount. For a transfer, both legs share the amount, so the
+ * whole transfer group is updated together.
+ */
+export async function setTransactionAmount(txId: string, amount: number): Promise<void> {
+  const tx = await db.transactions.get(txId)
+  if (!tx) return
+  const stamp = nowIso()
+  if (tx.transferGroupId) {
+    await db.transactions.where('transferGroupId').equals(tx.transferGroupId).modify({ amount, updatedAt: stamp })
+  } else {
+    await db.transactions.update(txId, { amount, updatedAt: stamp })
+  }
+}
+
 export async function softDeleteTransaction(txId: string): Promise<string[]> {
   const tx = await db.transactions.get(txId)
   if (!tx) return []

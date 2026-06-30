@@ -12,6 +12,8 @@ export const strings = {
   transfer: 'تحويل',
   add: 'إضافة',
   edit: 'تعديل',
+  editAmount: 'تعديل المبلغ',
+  editDetails: 'تعديل التفاصيل',
   delete: 'حذف',
   save: 'حفظ',
   cancel: 'إلغاء',
