@@ -34,7 +34,7 @@ export function AccountDetailPage() {
         <Button variant="danger" className="mt-3" onClick={() => archiveAccount(id)}>{t('archive')}</Button>
       </div>
       <div className="space-y-3">
-        {data.txs.map((tx) => <TransactionRow key={tx.id} tx={tx} currency={data.account.currency} />)}
+        {data.txs.map((tx) => <TransactionRow key={tx.id} tx={tx} currency={data.account.currency} accountName={data.account.name} />)}
       </div>
     </div>
   )

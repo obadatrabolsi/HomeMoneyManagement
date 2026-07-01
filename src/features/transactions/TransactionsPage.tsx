@@ -8,7 +8,7 @@ import { TransactionRow } from './TransactionRow'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { Toast } from '../../components/ui/Toast'
 import { t } from '../../i18n/ar'
-import type { Transaction } from '../../db/types'
+import type { Transaction, Account } from '../../db/types'
 
 export function TransactionsPage() {
   const filter = useUiStore((s) => s.filter)
@@ -17,10 +17,11 @@ export function TransactionsPage() {
   const result = useLiveQuery(async () => {
     const [txs, accounts, attachSet] = await Promise.all([queryTransactions(filter), listAccounts(), transactionIdsWithAttachments()])
     const accCur: Record<string, string> = {}
-    for (const a of accounts) accCur[a.id] = a.currency
-    return { txs, accCur, attachSet }
-  }, [JSON.stringify(filter)], { txs: [] as Transaction[], accCur: {} as Record<string, string>, attachSet: new Set<string>() })
-  const { txs, accCur, attachSet } = result
+    const accName: Record<string, string> = {}
+    for (const a of accounts) { accCur[a.id] = a.currency; accName[a.id] = a.name }
+    return { txs, accCur, accName, accounts, attachSet }
+  }, [JSON.stringify(filter)], { txs: [] as Transaction[], accCur: {} as Record<string, string>, accName: {} as Record<string, string>, accounts: [] as Account[], attachSet: new Set<string>() })
+  const { txs, accCur, accName, accounts, attachSet } = result
 
   return (
     <div className="animate-fade-in space-y-4">
@@ -31,9 +32,18 @@ export function TransactionsPage() {
         value={filter.text ?? ''}
         onChange={(e) => setFilter({ text: e.target.value })}
       />
+      <select
+        className="input"
+        aria-label={t('account')}
+        value={filter.accountId ?? ''}
+        onChange={(e) => setFilter({ accountId: e.target.value || undefined })}
+      >
+        <option value="">{t('allAccounts')}</option>
+        {accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+      </select>
       {txs.length === 0 && <EmptyState message={t('noData')} emoji="🧾" />}
       {txs.map((tx) => (
-        <TransactionRow key={tx.id} tx={tx} currency={accCur[tx.accountId] ?? 'EUR'} onDeleted={(ids) => setUndoIds(ids)} hasAttachment={attachSet.has(tx.id)} />
+        <TransactionRow key={tx.id} tx={tx} currency={accCur[tx.accountId] ?? 'EUR'} accountName={accName[tx.accountId]} onDeleted={(ids) => setUndoIds(ids)} hasAttachment={attachSet.has(tx.id)} />
       ))}
       {undoIds && (
         <Toast

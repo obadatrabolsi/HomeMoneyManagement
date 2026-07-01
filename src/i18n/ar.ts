@@ -19,6 +19,7 @@ export const strings = {
   archive: 'أرشفة',
   amount: 'المبلغ',
   account: 'الحساب',
+  allAccounts: 'كل الحسابات',
   category: 'التصنيف',
   date: 'التاريخ',
   notes: 'الملاحظات',

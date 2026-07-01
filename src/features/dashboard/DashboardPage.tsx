@@ -33,10 +33,11 @@ export function DashboardPage() {
     const recent = await recentTransactions(5)
     const accounts = await listAccounts()
     const accCur: Record<string, string> = {}
-    for (const a of accounts) accCur[a.id] = a.currency
+    const accName: Record<string, string> = {}
+    for (const a of accounts) { accCur[a.id] = a.currency; accName[a.id] = a.name }
     const monthNet: Record<string, number> = {}
     for (const [cur, tots] of Object.entries(monthByCur)) monthNet[cur] = tots.income - tots.expense
-    return { totals, dayByCur, monthByCur, monthNet, pie, budgets, goals, recent, accCur }
+    return { totals, dayByCur, monthByCur, monthNet, pie, budgets, goals, recent, accCur, accName }
   }, [], undefined)
 
   if (!data) return null
@@ -126,7 +127,7 @@ export function DashboardPage() {
       <section className="space-y-2">
         <h2 className="px-1 text-sm font-semibold text-muted">{t('recent')}</h2>
         {data.recent.length > 0 ? (
-          data.recent.map((tx) => <TransactionRow key={tx.id} tx={tx} currency={data.accCur[tx.accountId] ?? 'EUR'} />)
+          data.recent.map((tx) => <TransactionRow key={tx.id} tx={tx} currency={data.accCur[tx.accountId] ?? 'EUR'} accountName={data.accName[tx.accountId]} />)
         ) : (
           <EmptyState message={t('noData')} emoji="🧾" />
         )}
