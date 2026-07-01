@@ -20,6 +20,7 @@ export const strings = {
   amount: 'المبلغ',
   account: 'الحساب',
   allAccounts: 'كل الحسابات',
+  allTypes: 'الكل',
   category: 'التصنيف',
   date: 'التاريخ',
   notes: 'الملاحظات',

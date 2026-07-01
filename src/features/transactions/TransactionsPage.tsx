@@ -7,8 +7,9 @@ import { useUiStore } from '../../stores/uiStore'
 import { TransactionRow } from './TransactionRow'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { Toast } from '../../components/ui/Toast'
+import { SegmentedControl } from '../../components/ui/SegmentedControl'
 import { t } from '../../i18n/ar'
-import type { Transaction, Account } from '../../db/types'
+import type { Transaction, Account, TransactionType } from '../../db/types'
 
 export function TransactionsPage() {
   const filter = useUiStore((s) => s.filter)
@@ -41,6 +42,16 @@ export function TransactionsPage() {
         <option value="">{t('allAccounts')}</option>
         {accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
       </select>
+      <SegmentedControl<TransactionType | ''>
+        options={[
+          { value: '', label: t('allTypes') },
+          { value: 'expense', label: t('expense') },
+          { value: 'income', label: t('income') },
+          { value: 'transfer', label: t('transfer') },
+        ]}
+        value={filter.type ?? ''}
+        onChange={(v) => setFilter({ type: v || undefined })}
+      />
       {txs.length === 0 && <EmptyState message={t('noData')} emoji="🧾" />}
       {txs.map((tx) => (
         <TransactionRow key={tx.id} tx={tx} currency={accCur[tx.accountId] ?? 'EUR'} accountName={accName[tx.accountId]} onDeleted={(ids) => setUndoIds(ids)} hasAttachment={attachSet.has(tx.id)} />
