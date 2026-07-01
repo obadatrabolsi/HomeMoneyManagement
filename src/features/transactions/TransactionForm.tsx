@@ -11,6 +11,8 @@ import { SegmentedControl } from '../../components/ui/SegmentedControl'
 import { SearchableSelect } from '../../components/ui/SearchableSelect'
 import { t } from '../../i18n/ar'
 import type { TransactionType } from '../../db/types'
+import { compressImage, makeThumb } from '../../lib/image'
+import { addAttachment } from '../../db/attachmentsRepo'
 
 export function TransactionForm({ onDone }: { onDone: () => void }) {
   const [type, setType] = useState<TransactionType>('expense')
@@ -21,11 +23,37 @@ export function TransactionForm({ onDone }: { onDone: () => void }) {
   const [notes, setNotes] = useState('')
   const [error, setError] = useState('')
 
+  interface PendingImage { id: string; blob: Blob; thumb: Blob; url: string }
+  const [images, setImages] = useState<PendingImage[]>([])
+  const [imgBusy, setImgBusy] = useState(false)
+
   const accounts = useLiveQuery(() => listAccounts(), [], [])
   const categories = useLiveQuery(
     () => listCategories(type === 'income' ? 'income' : 'expense'),
     [type], [],
   )
+
+  const onPickFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? [])
+    e.target.value = ''
+    if (!files.length) return
+    setImgBusy(true)
+    try {
+      for (const f of files) {
+        try {
+          const blob = await compressImage(f)
+          const thumb = await makeThumb(f)
+          setImages((prev) => [...prev, { id: crypto.randomUUID(), blob, thumb, url: URL.createObjectURL(thumb) }])
+        } catch { setError(t('imageError')) }
+      }
+    } finally { setImgBusy(false) }
+  }
+
+  const removeImage = (imgId: string) => setImages((prev) => {
+    const it = prev.find((p) => p.id === imgId)
+    if (it) URL.revokeObjectURL(it.url)
+    return prev.filter((p) => p.id !== imgId)
+  })
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,16 +62,25 @@ export function TransactionForm({ onDone }: { onDone: () => void }) {
       const cents = parseAmount(amount)
       if (!(cents > 0)) { setError('أدخل مبلغًا أكبر من صفر'); return }
       const date = isoDate(new Date())
+      let attachTo: string | undefined
       if (type === 'transfer') {
-        await createTransfer({ fromAccountId: accountId, toAccountId, amount: cents, date })
+        const r = await createTransfer({ fromAccountId: accountId, toAccountId, amount: cents, date })
+        attachTo = r.outId
       } else {
-        await createTransaction({
+        const created = await createTransaction({
           type, amount: cents, accountId,
           categoryId: categoryId || undefined,
           notes: notes.trim() || undefined,
           date,
         })
+        attachTo = created.id
       }
+      if (attachTo) {
+        for (const img of images) {
+          await addAttachment({ transactionId: attachTo, blob: img.blob, thumb: img.thumb, mime: 'image/jpeg' })
+        }
+      }
+      images.forEach((i) => URL.revokeObjectURL(i.url))
       onDone()
     } catch (err) {
       const msg = (err as Error).message
@@ -98,6 +135,21 @@ export function TransactionForm({ onDone }: { onDone: () => void }) {
           </Field>
         </>
       )}
+      <Field label={t('attachments')}>
+        <div className="flex flex-wrap gap-2">
+          {images.map((img) => (
+            <div key={img.id} className="relative">
+              <img src={img.url} alt="مرفق" className="h-16 w-16 rounded-lg object-cover" />
+              <button type="button" aria-label={t('deleteImage')} onClick={() => removeImage(img.id)}
+                className="absolute -left-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-expense text-xs text-white">×</button>
+            </div>
+          ))}
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-surface-2 px-4 py-2 text-sm font-medium text-ink">
+            {imgBusy ? '…' : t('addImage')}
+            <input type="file" accept="image/*" multiple className="hidden" onChange={onPickFiles} disabled={imgBusy} />
+          </label>
+        </div>
+      </Field>
       {error && <p className="text-sm font-medium text-expense">{error}</p>}
       <Button type="submit" variant="primary" className="w-full">{t('save')}</Button>
     </form>
