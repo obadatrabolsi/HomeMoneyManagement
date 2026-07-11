@@ -1,16 +1,19 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { t } from '../i18n/ar'
 import { Fab } from '../components/ui/Fab'
 import { Sheet } from '../components/ui/Sheet'
 import { Icon, type IconName } from '../components/ui/Icon'
 import { TransactionForm } from '../features/transactions/TransactionForm'
+import { pendingCount } from '../db/syncTracking'
 
 const tabs: { to: string; label: string; icon: IconName }[] = [
   { to: '/', label: t('dashboard'), icon: 'home' },
   { to: '/accounts', label: t('accounts'), icon: 'wallet' },
   { to: '/transactions', label: t('transactions'), icon: 'list' },
   { to: '/debts', label: t('debtsShort'), icon: 'credit-card' },
+  { to: '/sync', label: t('cloudSync'), icon: 'repeat' },
   { to: '/settings', label: t('settings'), icon: 'settings' },
 ]
 
@@ -26,6 +29,7 @@ const titles: Record<string, string> = {
   '/recurring': t('recurring'),
   '/debts': t('debts'),
   '/reports': t('reports'),
+  '/sync': t('cloudSync'),
 }
 
 export function AppShell() {
@@ -33,6 +37,7 @@ export function AppShell() {
   const { pathname } = useLocation()
   const isHome = pathname === '/'
   const title = titles[pathname] ?? t('appName')
+  const pending = useLiveQuery(() => pendingCount(), [], 0)
 
   return (
     <div className="mx-auto min-h-screen max-w-md bg-bg pb-24">
@@ -72,10 +77,15 @@ export function AppShell() {
             {({ isActive }) => (
               <>
                 <span
-                  className={`flex h-9 w-12 items-center justify-center rounded-2xl transition
+                  className={`relative flex h-9 w-12 items-center justify-center rounded-2xl transition
                     ${isActive ? 'bg-brand/10' : ''}`}
                 >
                   <Icon name={tab.icon} size={22} />
+                  {tab.to === '/sync' && pending > 0 && (
+                    <span className="absolute -top-0.5 end-1.5 min-w-4 rounded-full bg-expense px-1 text-[10px] font-bold leading-4 text-white">
+                      {pending > 99 ? '99+' : pending}
+                    </span>
+                  )}
                 </span>
                 {tab.label}
               </>

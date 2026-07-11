@@ -59,7 +59,7 @@ export interface AddContributionInput {
 }
 
 export async function addContribution(input: AddContributionInput): Promise<GoalContribution> {
-  const c: GoalContribution = { id: id(), createdAt: nowIso(), ...input }
+  const c: GoalContribution = { id: id(), createdAt: nowIso(), updatedAt: nowIso(), ...input }
   await db.goalContributions.add(c)
   return c
 }

@@ -9,9 +9,9 @@ function img(text = 'data'): Blob {
   return new Blob([text], { type: 'image/jpeg' })
 }
 
-describe('schema v6', () => {
-  it('is version 6 and exposes attachments', () => {
-    expect(SCHEMA_VERSION).toBe(6)
+describe('schema', () => {
+  it('is at least version 6 and exposes attachments', () => {
+    expect(SCHEMA_VERSION).toBeGreaterThanOrEqual(6)
     expect(db.attachments).toBeTruthy()
   })
 })

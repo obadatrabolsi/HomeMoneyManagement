@@ -2,6 +2,10 @@ import { db } from './schema'
 import { id } from '../lib/uuid'
 import type { Category, CategoryType } from './types'
 
+function nowIso(): string {
+  return new Date().toISOString()
+}
+
 export async function listCategories(type?: CategoryType): Promise<Category[]> {
   let rows = await db.categories.filter(c => !c.isArchived).toArray()
   if (type) rows = rows.filter(c => c.type === type)
@@ -13,13 +17,14 @@ export async function getCategory(catId: string): Promise<Category | undefined> 
 }
 
 export async function createCategory(
-  input: Omit<Category, 'id' | 'sortOrder' | 'isArchived'> & Partial<Pick<Category, 'sortOrder'>>,
+  input: Omit<Category, 'id' | 'sortOrder' | 'isArchived' | 'updatedAt'> & Partial<Pick<Category, 'sortOrder'>>,
 ): Promise<Category> {
   const count = await db.categories.count()
   const cat: Category = {
     id: id(),
     sortOrder: input.sortOrder ?? count,
     isArchived: false,
+    updatedAt: nowIso(),
     ...input,
   }
   await db.categories.add(cat)

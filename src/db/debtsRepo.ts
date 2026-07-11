@@ -26,9 +26,11 @@ export async function updateDebt(debtId: string, patch: Partial<Debt>): Promise<
 }
 
 export async function deleteDebt(debtId: string): Promise<void> {
+  const stamp = nowIso()
   await db.transaction('rw', db.debts, db.debtPayments, async () => {
-    await db.debtPayments.where('debtId').equals(debtId).delete()
-    await db.debts.delete(debtId)
+    // Soft-delete (tombstone) so the removal propagates during sync.
+    await db.debtPayments.where('debtId').equals(debtId).modify({ deletedAt: stamp })
+    await db.debts.update(debtId, { deletedAt: stamp })
   })
 }
 
@@ -38,7 +40,7 @@ export interface ListDebtsFilter {
 }
 
 export async function listDebts(filter: ListDebtsFilter = {}): Promise<Debt[]> {
-  let rows = await db.debts.toArray()
+  let rows = (await db.debts.toArray()).filter(d => !d.deletedAt)
   if (filter.direction) rows = rows.filter(d => d.direction === filter.direction)
   if (filter.includeSettled === false) rows = rows.filter(d => !d.isSettled)
   return rows.sort((a, b) => a.createdAt.localeCompare(b.createdAt))
@@ -52,13 +54,13 @@ export interface AddPaymentInput {
 }
 
 export async function addPayment(input: AddPaymentInput): Promise<DebtPayment> {
-  const payment: DebtPayment = { id: id(), createdAt: nowIso(), ...input }
+  const payment: DebtPayment = { id: id(), createdAt: nowIso(), updatedAt: nowIso(), ...input }
   await db.debtPayments.add(payment)
   return payment
 }
 
 export async function listPayments(debtId: string): Promise<DebtPayment[]> {
-  const rows = await db.debtPayments.where('debtId').equals(debtId).toArray()
+  const rows = (await db.debtPayments.where('debtId').equals(debtId).toArray()).filter(p => !p.deletedAt)
   return rows.sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt))
 }
 
@@ -71,7 +73,7 @@ export interface DebtProgress {
 }
 
 async function paidByDebt(): Promise<Record<string, number>> {
-  const payments = await db.debtPayments.toArray()
+  const payments = (await db.debtPayments.toArray()).filter(p => !p.deletedAt)
   const sums: Record<string, number> = {}
   for (const p of payments) sums[p.debtId] = (sums[p.debtId] ?? 0) + p.amount
   return sums

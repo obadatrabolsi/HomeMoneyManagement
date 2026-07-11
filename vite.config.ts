@@ -27,8 +27,8 @@ export default defineConfig(({ command }) => ({
       scope: '.',
       display: 'standalone',
       orientation: 'portrait',
-      background_color: '#6D28D9',
-      theme_color: '#6D28D9',
+      background_color: '#2563EB',
+      theme_color: '#2563EB',
       categories: ['finance', 'productivity'],
       icons: [
         { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
@@ -41,5 +41,8 @@ export default defineConfig(({ command }) => ({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
+    // Tests exercise the offline app; force Supabase "not configured" so a real
+    // .env.local (with your project's credentials) never changes test behavior.
+    env: { VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '' },
   },
 }))

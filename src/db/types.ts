@@ -1,4 +1,20 @@
-export interface Account {
+export type SyncState = 'pending' | 'synced'
+
+/**
+ * Fields shared by every cloud-synced entity (added in schema v7).
+ * - `updatedAt` is the Last-Write-Wins clock for sync.
+ * - `deletedAt` is a tombstone so deletes propagate between devices.
+ * - `userId` scopes the row to its owner once cloud sync is enabled.
+ * - `syncState` drives the "pending vs synced" sync-status UI.
+ */
+export interface Syncable {
+  updatedAt: string
+  deletedAt?: string
+  userId?: string
+  syncState?: SyncState
+}
+
+export interface Account extends Syncable {
   id: string
   name: string
   description?: string
@@ -9,12 +25,11 @@ export interface Account {
   isArchived: boolean
   sortOrder: number
   createdAt: string
-  updatedAt: string
 }
 
 export type CategoryType = 'income' | 'expense'
 
-export interface Category {
+export interface Category extends Syncable {
   id: string
   name: string
   type: CategoryType
@@ -27,7 +42,7 @@ export interface Category {
 
 export type TransactionType = 'income' | 'expense' | 'transfer'
 
-export interface Transaction {
+export interface Transaction extends Syncable {
   id: string
   type: TransactionType
   amount: number // cents, always positive
@@ -43,8 +58,6 @@ export interface Transaction {
   counterAccountId?: string
   transferDirection?: 'out' | 'in'
   createdAt: string
-  updatedAt: string
-  deletedAt?: string
 }
 
 export interface Settings {
@@ -57,17 +70,16 @@ export interface Settings {
   pinHash?: string
 }
 
-export interface Budget {
+export interface Budget extends Syncable {
   id: string
   categoryId: string
   month: string // yyyy-MM
   amount: number // cents
   currency: string
   createdAt: string
-  updatedAt: string
 }
 
-export interface Goal {
+export interface Goal extends Syncable {
   id: string
   name: string
   targetAmount: number // cents
@@ -79,10 +91,9 @@ export interface Goal {
   isArchived: boolean
   sortOrder: number
   createdAt: string
-  updatedAt: string
 }
 
-export interface GoalContribution {
+export interface GoalContribution extends Syncable {
   id: string
   goalId: string
   amount: number // cents, may be negative
@@ -93,7 +104,7 @@ export interface GoalContribution {
 
 export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
-export interface RecurringRule {
+export interface RecurringRule extends Syncable {
   id: string
   type: 'income' | 'expense'
   amount: number // cents
@@ -111,12 +122,11 @@ export interface RecurringRule {
   runCount?: number // occurrences generated so far (anchors nextRunDate to startDate)
   isActive: boolean
   createdAt: string
-  updatedAt: string
 }
 
 export type DebtDirection = 'owe' | 'owed'
 
-export interface Debt {
+export interface Debt extends Syncable {
   id: string
   direction: DebtDirection
   person: string
@@ -126,10 +136,9 @@ export interface Debt {
   notes?: string
   isSettled: boolean
   createdAt: string
-  updatedAt: string
 }
 
-export interface DebtPayment {
+export interface DebtPayment extends Syncable {
   id: string
   debtId: string
   amount: number // cents
@@ -146,4 +155,13 @@ export interface Attachment {
   mime: string
   size: number
   createdAt: string
+}
+
+/**
+ * Per-table sync bookkeeping (local only). `lastPulledAt` is the newest
+ * server `updatedAt` we have already pulled for that table (the pull cursor).
+ */
+export interface SyncMeta {
+  table: string
+  lastPulledAt: string
 }

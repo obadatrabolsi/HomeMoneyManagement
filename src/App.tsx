@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route } from 'react-router-dom'
+import { AuthGate } from './features/auth/AuthGate'
 import { LockGate } from './features/lock/LockGate'
 import { AppShell } from './routes/AppShell'
 import { DashboardPage } from './features/dashboard/DashboardPage'
@@ -12,9 +13,11 @@ import { GoalsPage } from './features/goals/GoalsPage'
 import { RecurringPage } from './features/recurring/RecurringPage'
 import { DebtsPage } from './features/debts/DebtsPage'
 import { ReportsPage } from './features/reports/ReportsPage'
+import { SyncPage } from './features/sync/SyncPage'
 
 export default function App() {
   return (
+    <AuthGate>
     <LockGate>
     <HashRouter>
       <Routes>
@@ -30,9 +33,11 @@ export default function App() {
           <Route path="/recurring" element={<RecurringPage />} />
           <Route path="/debts" element={<DebtsPage />} />
           <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/sync" element={<SyncPage />} />
         </Route>
       </Routes>
     </HashRouter>
     </LockGate>
+    </AuthGate>
   )
 }
