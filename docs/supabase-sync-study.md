@@ -393,3 +393,4 @@ const pending = useLiveQuery(async () => {
 - كل [src/db/*Repo.ts](../src/db/) (soft‑delete موحّد + كتابة outbox + ضبط `syncState`)
 - جديد: `src/db/supabase.ts` (العميل)، `src/sync/*` (المحرّك)، `src/features/auth/AuthGate.tsx` + شاشة دخول، `src/features/sync/SyncPage.tsx` (واجهة الحالة)
 - [App.tsx](../src/App.tsx) (لفّ `AuthGate` أعلى الشجرة) · [AppShell.tsx](../src/routes/AppShell.tsx) (تبويب `/sync` + شارة العدّاد)
+
