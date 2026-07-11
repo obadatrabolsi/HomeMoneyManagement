@@ -27,15 +27,22 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Diagnostic: reports whether the build can see the config, WITHOUT ever
+      # printing the values themselves (the `!= ''` yields only true/false).
+      - name: Check Supabase config source
+        run: |
+          echo "vars.VITE_SUPABASE_URL present:         ${{ vars.VITE_SUPABASE_URL != '' }}"
+          echo "secrets.VITE_SUPABASE_URL present:      ${{ secrets.VITE_SUPABASE_URL != '' }}"
+          echo "vars.VITE_SUPABASE_ANON_KEY present:    ${{ vars.VITE_SUPABASE_ANON_KEY != '' }}"
+          echo "secrets.VITE_SUPABASE_ANON_KEY present: ${{ secrets.VITE_SUPABASE_ANON_KEY != '' }}"
       - run: npm run build
-        # Supabase cloud sync for the deployed site. Add these as repository
-        # Variables (Settings → Secrets and variables → Actions → Variables).
-        # If unset they resolve to empty, and the deploy stays pure-offline.
-        # The anon key is publishable (it ships in the public JS bundle), so
-        # Variables — not Secrets — is the right place.
+        # Supabase cloud sync for the deployed site. Reads repository Variables,
+        # falling back to Secrets, so it works whichever tab you used. Unset in
+        # both = pure-offline deploy. The anon key is publishable (it ships in
+        # the public JS bundle), so repository Variables is the natural place.
         env:
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY || secrets.VITE_SUPABASE_ANON_KEY }}
       # Requires Pages enabled once: Settings → Pages → Source = "GitHub Actions"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
