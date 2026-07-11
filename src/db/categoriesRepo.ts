@@ -7,9 +7,58 @@ function nowIso(): string {
 }
 
 export async function listCategories(type?: CategoryType): Promise<Category[]> {
-  let rows = await db.categories.filter(c => !c.isArchived).toArray()
+  let rows = await db.categories.filter(c => !c.isArchived && !c.deletedAt).toArray()
   if (type) rows = rows.filter(c => c.type === type)
   return rows.sort((a, b) => a.sortOrder - b.sortOrder)
+}
+
+/**
+ * Fold duplicate categories (same type+name) into a single survivor.
+ *
+ * Default categories are seeded locally on each device with fresh random UUIDs,
+ * so two devices seed the *same* categories under *different* ids — and sync,
+ * which matches on id, then treats them as distinct rows and duplicates them.
+ *
+ * The survivor is the lexicographically smallest id in the group: a choice every
+ * device computes identically once it has synced, so all devices converge on the
+ * same winner without coordination. References are re-pointed to the survivor and
+ * the losers become tombstones, so the merge itself propagates. Idempotent.
+ *
+ * Returns how many duplicate rows were merged away.
+ */
+export async function dedupeCategories(): Promise<number> {
+  const live = (await db.categories.toArray()).filter(c => !c.deletedAt)
+
+  const groups = new Map<string, Category[]>()
+  for (const c of live) {
+    const key = `${c.type}:${c.name}`
+    const group = groups.get(key) ?? []
+    group.push(c)
+    groups.set(key, group)
+  }
+
+  let merged = 0
+  const stamp = nowIso()
+  for (const group of groups.values()) {
+    if (group.length < 2) continue
+    group.sort((a, b) => a.id.localeCompare(b.id))
+    const survivorId = group[0].id
+    const loserIds = group.slice(1).map(c => c.id)
+
+    // Re-point every reference so no transaction/budget/rule is orphaned.
+    await db.transactions.where('categoryId').anyOf(loserIds).modify({ categoryId: survivorId })
+    await db.budgets.where('categoryId').anyOf(loserIds).modify({ categoryId: survivorId })
+    await db.categories.where('parentId').anyOf(loserIds).modify({ parentId: survivorId })
+    // recurringRules.categoryId isn't indexed — scan this small table instead.
+    await db.recurringRules
+      .filter(r => !!r.categoryId && loserIds.includes(r.categoryId))
+      .modify({ categoryId: survivorId })
+
+    // Tombstone the losers so the de-duplication syncs to the other devices.
+    await db.categories.where('id').anyOf(loserIds).modify({ deletedAt: stamp })
+    merged += loserIds.length
+  }
+  return merged
 }
 
 export async function getCategory(catId: string): Promise<Category | undefined> {

@@ -2,6 +2,7 @@ import { isSupabaseConfigured, currentUserId } from '../db/supabase'
 import { supabaseAdapter } from './supabaseAdapter'
 import { syncOnce } from './engine'
 import { claimLocalDataForUser } from './claim'
+import { dedupeCategories } from '../db/categoriesRepo'
 import { useSyncStore } from '../stores/syncStore'
 import type { RemoteAdapter } from './types'
 
@@ -18,6 +19,9 @@ export async function runSync(adapter: RemoteAdapter = supabaseAdapter): Promise
   useSyncStore.getState().set({ status: 'syncing', error: null })
   try {
     await syncOnce(adapter)
+    // A pull can bring in another device's copy of the default categories (same
+    // names, different ids). Fold them, and push the merge straight back out.
+    if ((await dedupeCategories()) > 0) await syncOnce(adapter)
     useSyncStore.getState().set({ status: 'idle', lastSyncedAt: new Date().toISOString() })
   } catch (e) {
     useSyncStore.getState().set({ status: 'error', error: (e as Error).message })
