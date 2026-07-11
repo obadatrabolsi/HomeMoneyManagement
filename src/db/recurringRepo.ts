@@ -93,7 +93,17 @@ export async function processDueRules(today: string): Promise<number> {
       created++
     }
     const deactivate = !!rule.endDate && next > rule.endDate
-    await updateRule(rule.id, { nextRunDate: next, lastRunDate: last, runCount: count, isActive: deactivate ? false : rule.isActive })
+    const newActive = deactivate ? false : rule.isActive
+    // Only write when something actually changed, otherwise every app start
+    // would bump updatedAt and re-queue the rule for sync forever (needless churn).
+    const changed =
+      next !== rule.nextRunDate ||
+      last !== rule.lastRunDate ||
+      count !== (rule.runCount ?? 0) ||
+      newActive !== rule.isActive
+    if (changed) {
+      await updateRule(rule.id, { nextRunDate: next, lastRunDate: last, runCount: count, isActive: newActive })
+    }
   }
   return created
 }
