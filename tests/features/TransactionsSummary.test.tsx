@@ -27,12 +27,16 @@ describe('Transactions summary total', () => {
 
     render(<MemoryRouter><TransactionsPage /></MemoryRouter>)
 
-    // No filter → all three rows are counted.
+    // Default account A is preselected → only its two transactions are counted.
+    await waitFor(() => expect(count()).toBe('2'))
+
+    // Switch to all accounts → all three rows are counted.
+    const select = screen.getByLabelText('الحساب') as HTMLSelectElement
+    await userEvent.selectOptions(select, '')
     await waitFor(() => expect(count()).toBe('3'))
 
-    // Filter to account A → only its two transactions remain.
-    const select = screen.getByLabelText('الحساب') as HTMLSelectElement
-    await userEvent.selectOptions(select, a.id)
-    await waitFor(() => expect(count()).toBe('2'))
+    // Switch to account B → only its single transaction remains.
+    await userEvent.selectOptions(select, b.id)
+    await waitFor(() => expect(count()).toBe('1'))
   })
 })

@@ -77,6 +77,7 @@ export const strings = {
   nextRun: 'التشغيل التالي',
   active: 'نشِطة',
   debts: 'الديون والقروض',
+  debtsShort: 'الديون',
   owe: 'عليّ',
   owed: 'لي',
   person: 'الشخص',

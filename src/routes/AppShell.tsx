@@ -10,7 +10,7 @@ const tabs: { to: string; label: string; icon: IconName }[] = [
   { to: '/', label: t('dashboard'), icon: 'home' },
   { to: '/accounts', label: t('accounts'), icon: 'wallet' },
   { to: '/transactions', label: t('transactions'), icon: 'list' },
-  { to: '/budgets', label: t('budgets'), icon: 'budget' },
+  { to: '/debts', label: t('debtsShort'), icon: 'credit-card' },
   { to: '/settings', label: t('settings'), icon: 'settings' },
 ]
 
