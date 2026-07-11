@@ -50,11 +50,11 @@ export async function updateRule(ruleId: string, patch: Partial<RecurringRule>):
 }
 
 export async function deleteRule(ruleId: string): Promise<void> {
-  await db.recurringRules.delete(ruleId)
+  await db.recurringRules.update(ruleId, { deletedAt: nowIso() })
 }
 
 export async function listRules(includeInactive = false): Promise<RecurringRule[]> {
-  const rows = await db.recurringRules.toArray()
+  const rows = (await db.recurringRules.toArray()).filter(r => !r.deletedAt)
   return rows
     .filter(r => includeInactive || r.isActive)
     .sort((a, b) => a.nextRunDate.localeCompare(b.nextRunDate))
@@ -75,7 +75,7 @@ export async function processDueRules(today: string): Promise<number> {
   const rules = await db.recurringRules.toArray()
   let created = 0
   for (const rule of rules) {
-    if (!rule.isActive) continue
+    if (rule.deletedAt || !rule.isActive) continue
     let count = rule.runCount ?? 0
     let next = rule.nextRunDate
     let last = rule.lastRunDate

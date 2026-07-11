@@ -16,7 +16,7 @@ export interface CreateBudgetInput {
 export async function createBudget(input: CreateBudgetInput): Promise<Budget> {
   const existing = await db.budgets
     .where('[month+currency]').equals([input.month, input.currency])
-    .filter(b => b.categoryId === input.categoryId)
+    .filter(b => b.categoryId === input.categoryId && !b.deletedAt)
     .first()
   if (existing) throw new Error('DUPLICATE_BUDGET')
   const budget: Budget = { id: id(), createdAt: nowIso(), updatedAt: nowIso(), ...input }
@@ -29,11 +29,12 @@ export async function updateBudget(budgetId: string, patch: Partial<Budget>): Pr
 }
 
 export async function deleteBudget(budgetId: string): Promise<void> {
-  await db.budgets.delete(budgetId)
+  await db.budgets.update(budgetId, { deletedAt: nowIso() })
 }
 
 export async function listBudgets(month: string): Promise<Budget[]> {
-  return db.budgets.where('month').equals(month).toArray()
+  const rows = await db.budgets.where('month').equals(month).toArray()
+  return rows.filter(b => !b.deletedAt)
 }
 
 export interface BudgetProgress {

@@ -18,7 +18,7 @@ export function IconBadge({
   color?: string
   size?: keyof typeof sizes
 }) {
-  const tint = color ?? '#6D28D9'
+  const tint = color ?? '#2563EB'
   return (
     <span
       className={`flex shrink-0 items-center justify-center ${sizes[size]}`}
