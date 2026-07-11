@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { queryTransactions, undoDelete } from '../../db/transactionsRepo'
 import { transactionIdsWithAttachments } from '../../db/attachmentsRepo'
-import { listAccounts } from '../../db/accountsRepo'
+import { listAccounts, resolveDefaultAccountId } from '../../db/accountsRepo'
 import { useUiStore } from '../../stores/uiStore'
 import { summarizeTransactions } from '../../lib/txSummary'
 import { formatMoney } from '../../lib/money'
@@ -16,7 +16,14 @@ import type { Transaction, Account, TransactionType } from '../../db/types'
 export function TransactionsPage() {
   const filter = useUiStore((s) => s.filter)
   const setFilter = useUiStore((s) => s.setFilter)
+  const initFilterAccount = useUiStore((s) => s.initFilterAccount)
   const [undoIds, setUndoIds] = useState<string[] | null>(null)
+
+  // On first open, preselect the default account in the filter (once — a later
+  // switch to "all accounts" or another account is preserved).
+  const defaultAccountId = useLiveQuery(() => resolveDefaultAccountId(), [], undefined)
+  useEffect(() => { if (defaultAccountId) initFilterAccount(defaultAccountId) }, [defaultAccountId, initFilterAccount])
+
   const result = useLiveQuery(async () => {
     const [txs, accounts, attachSet] = await Promise.all([queryTransactions(filter), listAccounts(), transactionIdsWithAttachments()])
     const accCur: Record<string, string> = {}

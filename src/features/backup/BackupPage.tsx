@@ -140,7 +140,6 @@ export function BackupPage() {
           <Link to="/budgets" className="rounded-full bg-surface-2 px-3.5 py-1.5 text-sm font-medium text-ink">{t('budgets')}</Link>
           <Link to="/categories" className="rounded-full bg-surface-2 px-3.5 py-1.5 text-sm font-medium text-ink">{t('categories')}</Link>
           <Link to="/recurring" className="rounded-full bg-surface-2 px-3.5 py-1.5 text-sm font-medium text-ink">{t('recurring')}</Link>
-          <Link to="/debts" className="rounded-full bg-surface-2 px-3.5 py-1.5 text-sm font-medium text-ink">{t('debts')}</Link>
           <Link to="/reports" className="rounded-full bg-surface-2 px-3.5 py-1.5 text-sm font-medium text-ink">{t('reports')}</Link>
         </nav>
       </Card>
