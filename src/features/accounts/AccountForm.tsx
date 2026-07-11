@@ -5,7 +5,7 @@ import { Field } from '../../components/ui/Field'
 import { Button } from '../../components/ui/Button'
 import { t } from '../../i18n/ar'
 import { parseAmount } from '../../lib/money'
-import { createAccount } from '../../db/accountsRepo'
+import { createAccount, setDefaultAccount } from '../../db/accountsRepo'
 import { CURRENCIES, CURRENCY_CODES } from '../../lib/currencies'
 
 const schema = z.object({
@@ -13,6 +13,7 @@ const schema = z.object({
   currency: z.enum(CURRENCY_CODES as [string, ...string[]]),
   color: z.string().min(1),
   initialBalance: z.string(),
+  isDefault: z.boolean().optional(),
 })
 type FormValues = z.infer<typeof schema>
 
@@ -22,10 +23,11 @@ export function AccountForm({ onDone }: { onDone: () => void }) {
     defaultValues: { currency: 'SYP', color: '#10b981', initialBalance: '0' },
   })
   const onSubmit = async (v: FormValues) => {
-    await createAccount({
+    const acc = await createAccount({
       name: v.name, icon: '🏦', color: v.color, currency: v.currency,
       initialBalance: parseAmount(v.initialBalance || '0'),
     })
+    if (v.isDefault) await setDefaultAccount(acc.id)
     onDone()
   }
   return (
@@ -43,6 +45,10 @@ export function AccountForm({ onDone }: { onDone: () => void }) {
       <Field label={t('initialBalance')}>
         <input className="input" inputMode="decimal" {...register('initialBalance')} />
       </Field>
+      <label className="flex items-center gap-2 text-sm font-medium text-ink">
+        <input type="checkbox" className="h-4 w-4 accent-brand" {...register('isDefault')} />
+        <span>{t('defaultAccount')}</span>
+      </label>
       <Button type="submit" variant="primary" className="w-full">{t('save')}</Button>
     </form>
   )

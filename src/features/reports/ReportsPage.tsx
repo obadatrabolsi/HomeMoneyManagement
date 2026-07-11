@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { incomeExpenseTotals, categorySpending, monthlyTotals, statistics } from '../../db/reportsRepo'
-import { listAccounts } from '../../db/accountsRepo'
+import { listAccounts, resolveDefaultAccountId } from '../../db/accountsRepo'
 import { listCategories } from '../../db/categoriesRepo'
-import { db } from '../../db/schema'
 import { monthRange } from '../../lib/date'
 import { formatMoney } from '../../lib/money'
 import { CategoryPie } from '../dashboard/CategoryPie'
@@ -31,25 +30,27 @@ function periodRange(key: PeriodKey): { from: string; to: string; year: number }
 }
 
 export function ReportsPage() {
-  const [currency, setCurrency] = useState('')
+  // null = follow the default account, otherwise an explicit account id.
+  const [override, setOverride] = useState<string | null>(null)
   const [period, setPeriod] = useState<PeriodKey>('thisMonth')
 
   const data = useLiveQuery(async () => {
-    const settings = await db.settings.get('singleton')
-    const accounts = await listAccounts(true)
-    const currencies = [...new Set(accounts.map((a) => a.currency))]
-    const cur = currency || settings?.defaultCurrency || currencies[0] || 'EUR'
+    const accounts = await listAccounts()
+    const defaultId = await resolveDefaultAccountId()
+    const selectedId = override !== null ? override : (defaultId ?? accounts[0]?.id ?? '')
+    const account = accounts.find((a) => a.id === selectedId) ?? null
+    const cur = account?.currency ?? 'EUR'
     const { from, to, year } = periodRange(period)
-    const totals = await incomeExpenseTotals(from, to, cur)
+    const totals = await incomeExpenseTotals(from, to, selectedId)
     const cats = await listCategories('expense')
     const catName = (id: string | null) => cats.find((c) => c.id === id)?.name ?? 'أخرى'
-    const spending = await categorySpending(from, to, cur)
+    const spending = await categorySpending(from, to, selectedId)
     const pie = spending.map((s) => ({ name: catName(s.categoryId), value: s.total / 100 }))
-    const monthly = await monthlyTotals(year, cur)
-    const stats = await statistics(from, to, cur)
+    const monthly = await monthlyTotals(year, selectedId)
+    const stats = await statistics(from, to, selectedId)
     const accName = (id: string | null) => accounts.find((a) => a.id === id)?.name ?? '—'
-    return { cur, currencies, totals, pie, monthly, stats, catName, accName }
-  }, [currency, period], undefined)
+    return { cur, accounts, selectedId, totals, pie, monthly, stats, catName, accName }
+  }, [override, period], undefined)
 
   if (!data) return null
   return (
@@ -59,9 +60,9 @@ export function ReportsPage() {
         <Button variant="soft" className="no-print" onClick={() => window.print()}>{t('savePdf')}</Button>
       </div>
       <div className="flex gap-2">
-        <Field label={t('currency')}>
-          <select className="input" value={data.cur} onChange={(e) => setCurrency(e.target.value)}>
-            {data.currencies.map((c) => <option key={c} value={c}>{c}</option>)}
+        <Field label={t('account')}>
+          <select className="input" aria-label={t('account')} value={data.selectedId} onChange={(e) => setOverride(e.target.value)}>
+            {data.accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
           </select>
         </Field>
       </div>

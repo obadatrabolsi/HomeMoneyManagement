@@ -50,6 +50,7 @@ export interface Transaction {
 export interface Settings {
   id: 'singleton'
   defaultCurrency: string
+  defaultAccountId?: string
   theme: 'light' | 'dark' | 'system'
   schemaVersion: number
   pinSalt?: string

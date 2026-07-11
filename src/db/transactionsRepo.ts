@@ -184,9 +184,9 @@ export async function dayTotals(date: string): Promise<{ income: number; expense
   return rangeTotals(date, date)
 }
 
-export async function rangeTotals(from: string, to: string): Promise<{ income: number; expense: number }> {
+export async function rangeTotals(from: string, to: string, accountId?: string): Promise<{ income: number; expense: number }> {
   const rows = (await db.transactions.toArray()).filter(
-    t => !t.deletedAt && t.date >= from && t.date <= to,
+    t => !t.deletedAt && t.date >= from && t.date <= to && (!accountId || t.accountId === accountId),
   )
   return {
     income: rows.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0),
@@ -220,9 +220,10 @@ export async function dayTotalsByCurrency(date: string): Promise<Record<string, 
 export async function categoryBreakdown(
   from: string,
   to: string,
+  accountId?: string,
 ): Promise<Array<{ categoryId: string | null; total: number }>> {
   const rows = (await db.transactions.toArray()).filter(
-    t => !t.deletedAt && t.type === 'expense' && t.date >= from && t.date <= to,
+    t => !t.deletedAt && t.type === 'expense' && t.date >= from && t.date <= to && (!accountId || t.accountId === accountId),
   )
   const map = new Map<string | null, number>()
   for (const t of rows) {
