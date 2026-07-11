@@ -1,7 +1,25 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 export function Sheet({ open, onClose, children }: { open: boolean; onClose: () => void; children: ReactNode }) {
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
+  // While the sheet is open, push a throwaway history entry so a mobile Back
+  // gesture/button pops that entry (closing the sheet) instead of leaving the
+  // app. A UI-driven close consumes the entry itself via history.back().
+  useEffect(() => {
+    if (!open) return
+    let poppedByBack = false
+    window.history.pushState({ __sheet: true }, '')
+    const onPop = () => { poppedByBack = true; onCloseRef.current() }
+    window.addEventListener('popstate', onPop)
+    return () => {
+      window.removeEventListener('popstate', onPop)
+      if (!poppedByBack) window.history.back()
+    }
+  }, [open])
+
   if (!open) return null
   // Portal to <body> so ancestor transforms (e.g. animate-fade-in) don't
   // reposition this fixed overlay relative to the page box.
