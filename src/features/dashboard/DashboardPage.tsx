@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { totalsByCurrency, listAccounts } from '../../db/accountsRepo'
-import { dayTotalsByCurrency, rangeTotalsByCurrency, categoryBreakdown, recentTransactions } from '../../db/transactionsRepo'
+import { totalsByCurrency, listAccounts, accountBalance, resolveDefaultAccountId } from '../../db/accountsRepo'
+import { dayTotalsByCurrency, rangeTotalsByCurrency, categoryBreakdown, recentTransactions, rangeTotals, queryTransactions } from '../../db/transactionsRepo'
 import { listCategories } from '../../db/categoriesRepo'
 import { budgetProgress } from '../../db/budgetsRepo'
 import { goalsWithProgress } from '../../db/goalsRepo'
@@ -17,28 +18,56 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { t } from '../../i18n/ar'
 
 export function DashboardPage() {
+  // `override` is the user's explicit choice: null = follow the default account,
+  // '' = all accounts, otherwise a specific account id.
+  const [override, setOverride] = useState<string | null>(null)
+
   const data = useLiveQuery(async () => {
     const now = new Date()
     const today = isoDate(now)
     const month = monthRange(now)
-    const totals = await totalsByCurrency()
-    const dayByCur = await dayTotalsByCurrency(today)
-    const monthByCur = await rangeTotalsByCurrency(month.start, month.end)
-    const breakdown = await categoryBreakdown(month.start, month.end)
+
+    const accounts = await listAccounts()
+    const defaultId = await resolveDefaultAccountId()
+    const selected = override !== null ? override : (defaultId ?? '')
+    // A stale override (e.g. its account was archived) falls back to "all".
+    const scoped = selected !== '' && accounts.some((a) => a.id === selected)
+    const scopedAccount = scoped ? accounts.find((a) => a.id === selected)! : null
+
+    let totals: Record<string, number>
+    let dayByCur: Record<string, { income: number; expense: number }>
+    let monthByCur: Record<string, { income: number; expense: number }>
+    let breakdown: Array<{ categoryId: string | null; total: number }>
+    let recent
+
+    if (scopedAccount) {
+      const cur = scopedAccount.currency
+      totals = { [cur]: await accountBalance(scopedAccount.id) }
+      dayByCur = { [cur]: await rangeTotals(today, today, scopedAccount.id) }
+      monthByCur = { [cur]: await rangeTotals(month.start, month.end, scopedAccount.id) }
+      breakdown = await categoryBreakdown(month.start, month.end, scopedAccount.id)
+      recent = (await queryTransactions({ accountId: scopedAccount.id, sort: 'date_desc' })).slice(0, 5)
+    } else {
+      totals = await totalsByCurrency()
+      dayByCur = await dayTotalsByCurrency(today)
+      monthByCur = await rangeTotalsByCurrency(month.start, month.end)
+      breakdown = await categoryBreakdown(month.start, month.end)
+      recent = await recentTransactions(5)
+    }
+
     const cats = await listCategories('expense')
     const catName = (id: string | null) => cats.find((c) => c.id === id)?.name ?? 'أخرى'
     const pie = breakdown.map((b) => ({ name: catName(b.categoryId), value: b.total / 100 }))
     const budgets = (await budgetProgress(isoMonth(now))).slice(0, 3).map(p => ({ ...p, categoryName: catName(p.budget.categoryId) }))
     const goals = (await goalsWithProgress()).slice(0, 3)
-    const recent = await recentTransactions(5)
-    const accounts = await listAccounts()
     const accCur: Record<string, string> = {}
     const accName: Record<string, string> = {}
     for (const a of accounts) { accCur[a.id] = a.currency; accName[a.id] = a.name }
     const monthNet: Record<string, number> = {}
     for (const [cur, tots] of Object.entries(monthByCur)) monthNet[cur] = tots.income - tots.expense
-    return { totals, dayByCur, monthByCur, monthNet, pie, budgets, goals, recent, accCur, accName }
-  }, [], undefined)
+    // Keep the <select> value consistent: a stale id (archived account) reads as "all".
+    return { totals, dayByCur, monthByCur, monthNet, pie, budgets, goals, recent, accCur, accName, accounts, selected: scoped ? selected : '' }
+  }, [override], undefined)
 
   if (!data) return null
 
@@ -46,6 +75,17 @@ export function DashboardPage() {
 
   return (
     <div className="animate-fade-in space-y-4">
+      {data.accounts.length > 0 && (
+        <select
+          className="input"
+          aria-label={t('account')}
+          value={data.selected}
+          onChange={(e) => setOverride(e.target.value)}
+        >
+          <option value="">{t('allAccounts')}</option>
+          {data.accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+        </select>
+      )}
       <BalanceCard totals={data.totals} monthNet={data.monthNet} />
 
       {/* Today's income / expense */}

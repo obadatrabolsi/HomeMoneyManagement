@@ -2,22 +2,20 @@ import { differenceInCalendarDays, parseISO } from 'date-fns'
 import { db } from './schema'
 import type { Transaction } from './types'
 
-async function scopedTxs(from: string, to: string, currency: string): Promise<Transaction[]> {
-  const [accounts, txs] = await Promise.all([db.accounts.toArray(), db.transactions.toArray()])
-  const cur: Record<string, string> = {}
-  for (const a of accounts) cur[a.id] = a.currency
-  return txs.filter(t => !t.deletedAt && t.date >= from && t.date <= to && cur[t.accountId] === currency)
+async function scopedTxs(from: string, to: string, accountId: string): Promise<Transaction[]> {
+  const txs = await db.transactions.toArray()
+  return txs.filter(t => !t.deletedAt && t.date >= from && t.date <= to && t.accountId === accountId)
 }
 
-export async function incomeExpenseTotals(from: string, to: string, currency: string): Promise<{ income: number; expense: number; net: number }> {
-  const rows = await scopedTxs(from, to, currency)
+export async function incomeExpenseTotals(from: string, to: string, accountId: string): Promise<{ income: number; expense: number; net: number }> {
+  const rows = await scopedTxs(from, to, accountId)
   const income = rows.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
   const expense = rows.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
   return { income, expense, net: income - expense }
 }
 
-export async function categorySpending(from: string, to: string, currency: string): Promise<Array<{ categoryId: string | null; total: number }>> {
-  const rows = (await scopedTxs(from, to, currency)).filter(t => t.type === 'expense')
+export async function categorySpending(from: string, to: string, accountId: string): Promise<Array<{ categoryId: string | null; total: number }>> {
+  const rows = (await scopedTxs(from, to, accountId)).filter(t => t.type === 'expense')
   const map = new Map<string | null, number>()
   for (const t of rows) {
     const key = t.categoryId ?? null
@@ -26,10 +24,10 @@ export async function categorySpending(from: string, to: string, currency: strin
   return [...map.entries()].map(([categoryId, total]) => ({ categoryId, total })).sort((a, b) => b.total - a.total)
 }
 
-export async function monthlyTotals(year: number, currency: string): Promise<Array<{ month: string; income: number; expense: number }>> {
+export async function monthlyTotals(year: number, accountId: string): Promise<Array<{ month: string; income: number; expense: number }>> {
   const from = `${year}-01-01`
   const to = `${year}-12-31`
-  const rows = await scopedTxs(from, to, currency)
+  const rows = await scopedTxs(from, to, accountId)
   const months = Array.from({ length: 12 }, (_, i) => {
     const month = `${year}-${String(i + 1).padStart(2, '0')}`
     return { month, income: 0, expense: 0 }
@@ -53,8 +51,8 @@ export interface Statistics {
   mostUsedAccountId: string | null
 }
 
-export async function statistics(from: string, to: string, currency: string): Promise<Statistics> {
-  const rows = await scopedTxs(from, to, currency)
+export async function statistics(from: string, to: string, accountId: string): Promise<Statistics> {
+  const rows = await scopedTxs(from, to, accountId)
   const incExp = rows.filter(t => t.type === 'income' || t.type === 'expense')
   const expenses = rows.filter(t => t.type === 'expense')
   const incomes = rows.filter(t => t.type === 'income')

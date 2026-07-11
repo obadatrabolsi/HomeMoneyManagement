@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { listAccounts } from '../../db/accountsRepo'
+import { listAccounts, resolveDefaultAccountId } from '../../db/accountsRepo'
 import { listCategories } from '../../db/categoriesRepo'
 import { createTransaction, createTransfer } from '../../db/transactionsRepo'
 import { parseAmount } from '../../lib/money'
@@ -28,6 +28,13 @@ export function TransactionForm({ onDone }: { onDone: () => void }) {
   const [imgBusy, setImgBusy] = useState(false)
 
   const accounts = useLiveQuery(() => listAccounts(), [], [])
+  const defaultAccountId = useLiveQuery(() => resolveDefaultAccountId(), [], undefined)
+  // Pre-select the default account for the (from) account field once resolved.
+  useEffect(() => {
+    if (defaultAccountId && !accountId) setAccountId(defaultAccountId)
+    // Only react to the default resolving — not to manual account changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultAccountId])
   const categories = useLiveQuery(
     () => listCategories(type === 'income' ? 'income' : 'expense'),
     [type], [],

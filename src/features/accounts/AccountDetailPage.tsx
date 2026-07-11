@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/schema'
-import { accountBalance, archiveAccount } from '../../db/accountsRepo'
+import { accountBalance, archiveAccount, resolveDefaultAccountId, setDefaultAccount } from '../../db/accountsRepo'
 import { queryTransactions } from '../../db/transactionsRepo'
 import { formatMoney } from '../../lib/money'
 import { Button } from '../../components/ui/Button'
@@ -16,7 +16,8 @@ export function AccountDetailPage() {
     if (!account) return null
     const balance = await accountBalance(id)
     const txs = await queryTransactions({ accountId: id })
-    return { account, balance, txs }
+    const isDefault = (await resolveDefaultAccountId()) === id
+    return { account, balance, txs, isDefault }
   }, [id], undefined)
 
   if (!data) return null
@@ -31,7 +32,14 @@ export function AccountDetailPage() {
           </div>
         </div>
         <p className="mt-3 text-2xl font-bold tabular-nums text-ink">{formatMoney(data.balance, data.account.currency)}</p>
-        <Button variant="danger" className="mt-3" onClick={() => archiveAccount(id)}>{t('archive')}</Button>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {data.isDefault ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-brand/10 px-3 py-1.5 text-sm font-semibold text-brand">{t('defaultAccount')} ✓</span>
+          ) : (
+            <Button variant="soft" onClick={() => setDefaultAccount(id)}>{t('setAsDefault')}</Button>
+          )}
+          <Button variant="danger" onClick={() => archiveAccount(id)}>{t('archive')}</Button>
+        </div>
       </div>
       <div className="space-y-3">
         {data.txs.map((tx) => <TransactionRow key={tx.id} tx={tx} currency={data.account.currency} accountName={data.account.name} />)}

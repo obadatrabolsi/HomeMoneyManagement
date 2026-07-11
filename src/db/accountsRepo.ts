@@ -1,5 +1,6 @@
 import { db } from './schema'
 import { id } from '../lib/uuid'
+import { updateSettings } from './settingsRepo'
 import type { Account, Transaction } from './types'
 
 function nowIso(): string {
@@ -27,6 +28,10 @@ export async function createAccount(
     ...input,
   }
   await db.accounts.add(acc)
+  // First account created becomes the default automatically.
+  if ((await getDefaultAccountId()) === undefined) {
+    await setDefaultAccount(acc.id)
+  }
   return acc
 }
 
@@ -50,6 +55,33 @@ export async function updateAccount(accId: string, patch: Partial<Account>): Pro
 
 export async function archiveAccount(accId: string): Promise<void> {
   await db.accounts.update(accId, { isArchived: true, updatedAt: nowIso() })
+  // If we just archived the default account, hand the default to the first
+  // remaining non-archived account (or clear it when none are left).
+  if ((await getDefaultAccountId()) === accId) {
+    const remaining = await listAccounts()
+    await updateSettings({ defaultAccountId: remaining[0]?.id })
+  }
+}
+
+export async function getDefaultAccountId(): Promise<string | undefined> {
+  const settings = await db.settings.get('singleton')
+  return settings?.defaultAccountId
+}
+
+export async function setDefaultAccount(accountId: string): Promise<void> {
+  await updateSettings({ defaultAccountId: accountId })
+}
+
+/**
+ * The stored default account id if it still points to a live (non-archived)
+ * account; otherwise the first account; `undefined` when there are none.
+ */
+export async function resolveDefaultAccountId(): Promise<string | undefined> {
+  const accounts = await listAccounts()
+  if (accounts.length === 0) return undefined
+  const stored = await getDefaultAccountId()
+  if (stored && accounts.some(a => a.id === stored)) return stored
+  return accounts[0].id
 }
 
 export async function listAccounts(includeArchived = false): Promise<Account[]> {

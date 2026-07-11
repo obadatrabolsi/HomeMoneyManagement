@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link } from 'react-router-dom'
-import { listAccounts, accountBalance } from '../../db/accountsRepo'
+import { listAccounts, accountBalance, resolveDefaultAccountId } from '../../db/accountsRepo'
 import { formatMoney } from '../../lib/money'
 import { Button } from '../../components/ui/Button'
 import { Sheet } from '../../components/ui/Sheet'
@@ -13,10 +13,13 @@ import { t } from '../../i18n/ar'
 
 export function AccountsPage() {
   const [open, setOpen] = useState(false)
-  const accounts = useLiveQuery(async () => {
+  const data = useLiveQuery(async () => {
     const list = await listAccounts()
-    return Promise.all(list.map(async (a) => ({ ...a, balance: await accountBalance(a.id) })))
-  }, [], [])
+    const defaultId = await resolveDefaultAccountId()
+    const accounts = await Promise.all(list.map(async (a) => ({ ...a, balance: await accountBalance(a.id) })))
+    return { accounts, defaultId }
+  }, [], { accounts: [], defaultId: undefined })
+  const { accounts, defaultId } = data
 
   return (
     <div className="animate-fade-in space-y-4">
@@ -36,7 +39,12 @@ export function AccountsPage() {
         >
           <IconBadge icon={a.icon} color={a.color} />
           <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-ink">{a.name}</p>
+            <div className="flex items-center gap-2">
+              <p className="truncate font-semibold text-ink">{a.name}</p>
+              {a.id === defaultId && (
+                <span className="shrink-0 rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-semibold text-brand">{t('isDefault')}</span>
+              )}
+            </div>
             <p className="text-xs text-muted">{a.currency}</p>
           </div>
           <span className="tabular-nums font-semibold text-ink">{formatMoney(a.balance, a.currency)}</span>
