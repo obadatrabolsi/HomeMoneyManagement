@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --brand: 109 40 217; /* #6D28D9 */
-    --brand-soft: 139 92 246; /* #8B5CF6 */
-    --grad-from: 124 58 237; /* #7C3AED */
-    --grad-to: 99 102 241; /* #6366F1 */
+    --brand: 37 99 235; /* #2563EB blue-600 */
+    --brand-soft: 59 130 246; /* #3B82F6 blue-500 */
+    --grad-from: 37 99 235; /* #2563EB blue-600 */
+    --grad-to: 14 165 233; /* #0EA5E9 sky-500 */
     --income: 16 185 129; /* #10B981 */
     --expense: 244 63 94; /* #F43F5E */
     --transfer: 14 165 233; /* #0EA5E9 */
@@ -21,10 +21,10 @@
   }
 
   .dark {
-    --brand: 139 92 246; /* #8B5CF6 */
-    --brand-soft: 167 139 250; /* #A78BFA */
-    --grad-from: 124 58 237;
-    --grad-to: 79 70 229;
+    --brand: 59 130 246; /* #3B82F6 blue-500 */
+    --brand-soft: 96 165 250; /* #60A5FA blue-400 */
+    --grad-from: 37 99 235; /* #2563EB blue-600 */
+    --grad-to: 2 132 199; /* #0284C7 sky-600 */
     --income: 52 211 153; /* #34D399 */
     --expense: 251 113 133; /* #FB7185 */
     --transfer: 56 189 248; /* #38BDF8 */
