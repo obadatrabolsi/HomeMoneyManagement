@@ -28,6 +28,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        # Supabase cloud sync for the deployed site. Add these as repository
+        # Variables (Settings → Secrets and variables → Actions → Variables).
+        # If unset they resolve to empty, and the deploy stays pure-offline.
+        # The anon key is publishable (it ships in the public JS bundle), so
+        # Variables — not Secrets — is the right place.
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
       # Requires Pages enabled once: Settings → Pages → Source = "GitHub Actions"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
